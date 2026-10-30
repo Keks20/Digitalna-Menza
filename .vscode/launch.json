@@ -1,0 +1,13 @@
+{
+    // Pre pokretanja (F5) uključi Live Server: desni klik na index.html -> Open with Live Server
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Otvori u Chrome-u (Live Server)",
+            "url": "http://127.0.0.1:5500/index.html",
+            "webRoot": "${workspaceFolder}"
+        }
+    ]
+}

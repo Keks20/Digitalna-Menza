@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ritwickdey.liveserver",
+        "bmewburn.vscode-intelephense-client",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens"
+    ]
+}

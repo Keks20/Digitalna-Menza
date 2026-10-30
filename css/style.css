@@ -1,0 +1,339 @@
+/* =========================================================
+   Digitalna menza – naši stilovi preko Bootstrap 5
+   Bootstrap daje raspored (row/col, d-flex...) i komponente
+   (form-control, btn, form-check, alert); ovde menjamo boje,
+   font i razmake da izgleda kao u Figmi.
+   ========================================================= */
+
+:root {
+  --blue: #1e5fc0;
+  --blue-hover: #1850a5;
+  --blue-dark: #0b2a5b;
+  --text: #151c2c;
+  --muted: #6b7385;
+  --border: #e2e5ec;
+  --bg: #f3f4f8;
+  --danger: #c62828;
+
+  /* Bootstrap promenljive */
+  --bs-body-font-family: "Inter", system-ui, sans-serif;
+  --bs-body-color: #151c2c;
+  --bs-body-bg: #f3f4f8;
+  --bs-body-line-height: normal;
+  --bs-primary: #1e5fc0;
+  --bs-primary-rgb: 30, 95, 192;
+  --bs-danger: #c62828;
+  --bs-form-invalid-color: #c62828;
+  --bs-form-invalid-border-color: #c62828;
+}
+
+svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- LEVA STRANA ---------- */
+.hero {
+  background: linear-gradient(155deg, #0b2a5b 0%, #164a9c 55%, #1d5bbf 100%);
+  color: #fff;
+  padding: 54px;
+}
+
+@media (min-width: 992px) {
+  .hero {
+    flex: 0 0 52.4%;
+    max-width: 52.4%;
+  }
+}
+
+.brand-name {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.icon-box svg {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+}
+
+.hero-content {
+  margin-top: 78px;
+  max-width: 480px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.hero-text {
+  margin: 20px 0 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 420px;
+}
+
+.features {
+  margin: 30px 0 0;
+  gap: 12px;
+}
+
+.features li {
+  gap: 14px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.features .icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+.features .icon-box svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hero-footer {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---------- DESNA STRANA ---------- */
+.form-side {
+  padding: 40px;
+  background: var(--bg);
+}
+
+.form-wrapper {
+  max-width: 390px;
+}
+
+.form-wrapper h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+form {
+  margin-top: 30px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Polje sa ikonicom levo (i dugmetom oka desno kod lozinke) */
+.field {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.field .form-control {
+  height: 46px;
+  padding: 0 44px;
+  background-color: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.field .form-control::placeholder {
+  color: #8b93a5;
+}
+
+.field .form-control:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(30, 95, 192, 0.15);
+}
+
+/* Bootstrap-ova crvena ikonica bi se preklopila sa okom, pa je gasimo */
+.field .form-control.is-invalid {
+  border-color: var(--danger);
+  background-image: none;
+  padding-right: 44px;
+}
+
+.field .form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.12);
+}
+
+.field .invalid-feedback {
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.field-icon {
+  position: absolute;
+  left: 15px;
+  top: 23px; /* polovina visine polja (46px) */
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #7a8294;
+  pointer-events: none;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 23px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7a8294;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+}
+
+.toggle-password svg {
+  width: 18px;
+  height: 18px;
+}
+
+.toggle-password:focus-visible {
+  outline: 3px solid rgba(30, 95, 192, 0.35);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Zapamti me / Zaboravljena lozinka */
+.form-row-options {
+  margin-top: -4px;
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+.form-check {
+  min-height: 0;
+  padding-left: 23px;
+}
+
+.form-check-input {
+  width: 15px;
+  height: 15px;
+  margin-top: 0;
+  margin-left: -23px;
+  border-color: #b9bfcc;
+}
+
+.form-check-input:checked {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(30, 95, 192, 0.15);
+}
+
+.form-check-label {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.link {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Dugme za prijavu (Bootstrap btn-primary u našoj boji) */
+.btn-login {
+  --bs-btn-bg: var(--blue);
+  --bs-btn-border-color: var(--blue);
+  --bs-btn-hover-bg: var(--blue-hover);
+  --bs-btn-hover-border-color: var(--blue-hover);
+  --bs-btn-active-bg: var(--blue-hover);
+  --bs-btn-active-border-color: var(--blue-hover);
+  --bs-btn-focus-shadow-rgb: 30, 95, 192;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-login svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Poruka posle slanja (Bootstrap alert) */
+.form-message {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.info-box {
+  margin-top: 24px;
+  gap: 12px;
+  padding: 16px;
+  background: #e5edfa;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #1c2a44;
+}
+
+.info-box svg {
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: var(--blue);
+}
+
+/* ---------- TELEFON ---------- */
+.brand-mobile {
+  margin-bottom: 28px;
+}
+
+.brand-mobile .icon-box {
+  background: var(--blue);
+}
+
+.brand-mobile .brand-name {
+  color: var(--text);
+}
+
+@media (max-width: 991.98px) {
+  .form-side {
+    padding: 40px 16px;
+  }
+}

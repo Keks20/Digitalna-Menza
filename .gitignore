@@ -1,0 +1,15 @@
+# Lična VS Code podešavanja (launch.json i extensions.json delimo sa timom)
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Sistemski fajlovi
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Lokalna podešavanja baze - lozinke ne idu na GitHub
+config/config.local.php
+
+# Logovi
+*.log
