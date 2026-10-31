@@ -291,6 +291,15 @@ form {
   height: 16px;
 }
 
+/* Greška sa servera (pogrešna lozinka, blokirana kartica) */
+.form-alert {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
 /* Poruka posle slanja (Bootstrap alert) */
 .form-message {
   margin: 14px 0 0;

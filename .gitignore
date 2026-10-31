@@ -8,8 +8,8 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
-# Lokalna podešavanja baze - lozinke ne idu na GitHub
-config/config.local.php
+# Lokalna podešavanja baze – lozinke ne idu na GitHub
+config.local.php
 
 # Logovi
 *.log

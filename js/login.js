@@ -36,11 +36,6 @@ function clearError(input, errorEl) {
   input.removeAttribute("aria-invalid");
 }
 
-function showMessage(text) {
-  formMessage.textContent = text;
-  formMessage.classList.remove("d-none");
-}
-
 function hideMessage() {
   formMessage.textContent = "";
   formMessage.classList.add("d-none");
@@ -80,15 +75,5 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  // Dok PHP deo nije gotov (Live Server ili dupli klik na fajl),
-  // forma se ne šalje, već se prikazuje poruka.
-  // Ovaj blok obrisati kada login.php bude radio preko XAMPP-a.
-  const bezPhpServera = location.protocol === "file:" || location.port === "5500";
-  if (bezPhpServera) {
-    e.preventDefault();
-    showMessage("Podaci su ispravni. Prava prijava radi kada se sajt pokrene preko XAMPP-a (login.php).");
-    return;
-  }
-
-  // Inače se forma normalno šalje POST metodom na login.php
+  // Podaci su ispravni – forma se šalje POST metodom na login.php
 });

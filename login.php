@@ -1,3 +1,31 @@
+<?php
+require_once __DIR__ . '/src/Auth.php';
+
+$auth = new Auth();
+if ($auth->check()) {
+    header('Location: pocetna.php');
+    exit;
+}
+
+$greska = '';
+$brojKartice = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $brojKartice = trim($_POST['broj_kartice'] ?? '');
+    $lozinka = $_POST['lozinka'] ?? '';
+
+    if (!$auth->validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $greska = 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.';
+    } elseif ($auth->login($brojKartice, $lozinka)) {
+        header('Location: pocetna.php');
+        exit;
+    } else {
+        $greska = $auth->getGreska();
+    }
+}
+
+$csrfToken = $auth->generateCsrfToken();
+?>
 <!DOCTYPE html>
 <html lang="sr">
 <head>
@@ -80,10 +108,16 @@
           <p class="subtitle">Prijavi se brojem studentske kartice i lozinkom.</p>
 
           <form id="loginForm" method="post" action="login.php" novalidate>
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+
+            <?php if ($greska !== ''): ?>
+              <div class="alert alert-danger form-alert" role="alert"><?php echo htmlspecialchars($greska); ?></div>
+            <?php endif; ?>
+
             <label for="cardNumber" class="form-label">Broj kartice</label>
             <div class="field">
               <svg aria-hidden="true" class="field-icon" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M6 15h4M6 11h.01M10 11h8"/></svg>
-              <input type="text" class="form-control" id="cardNumber" name="broj_kartice" aria-describedby="cardError" placeholder="npr. 0012 3456 7890" inputmode="numeric" autocomplete="username" maxlength="14" />
+              <input type="text" class="form-control" id="cardNumber" name="broj_kartice" aria-describedby="cardError" value="<?php echo htmlspecialchars($brojKartice); ?>" placeholder="npr. 0012 3456 7890" inputmode="numeric" autocomplete="username" maxlength="14" />
               <div class="invalid-feedback" id="cardError"></div>
             </div>
 
