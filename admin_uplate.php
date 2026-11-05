@@ -1,22 +1,29 @@
 <?php
 /**
- * LOGIKA: uplate i obaveštenja (samo administrator).
+ * LOGIKA: uplate studenata i obaveštenja (samo administrator).
  * Izgled je u views/admin_uplate.view.php.
  *
- * Za sada deo sa obaveštenjima: objava, izmena i brisanje.
- * Pregled i potvrda uplata studenata se dodaju uz dopunu kartice.
- *
- * Adresa: admin_uplate.php            – nova poruka
- *         admin_uplate.php?izmeni=4   – forma popunjena obaveštenjem br. 4
+ * Adresa: admin_uplate.php                          – sve uplate, nova poruka
+ *         admin_uplate.php?status=ceka_potvrdu&q=Ana – filter uplata i pretraga
+ *         admin_uplate.php?izmeni=4                 – forma popunjena obaveštenjem br. 4
  *
  * Forma šalje POST sa poljem "akcija":
- *   objavi  – novo obaveštenje
- *   izmeni  – izmena postojećeg (polje id)
- *   obrisi  – brisanje (polje id)
- * Posle uspeha preusmeravanje na admin_uplate.php (Post/Redirect/Get).
+ *   potvrdi  – uplata koja čeka postaje uspešna i novac se dodaje na karticu (polje id)
+ *   odbij    – uplata koja čeka se odbija (polje id)
+ *   objavi   – novo obaveštenje
+ *   izmeni   – izmena postojećeg obaveštenja (polje id)
+ *   obrisi   – brisanje obaveštenja (polje id)
+ * Posle uspeha preusmeravanje nazad (Post/Redirect/Get), filter uplata ostaje isti.
  *
  * Prikaz dobija:
  *   $admin         Admin        prijavljeni administrator
+ *   $uplate        array        uplate: ['id', 'kreirano', 'ime', 'prezime', 'broj_kartice', 'nacin', 'iznos', 'status']
+ *   $filterStatus  string       '' (sve) | 'ceka_potvrdu' | 'odbijeno' | 'uspesno'
+ *   $pretraga      string       tekst iz polja za pretragu
+ *   $FILTERI       array        ['' => 'Sve', 'ceka_potvrdu' => 'Čeka potvrdu', ...] za dugmad filtera
+ *   $uplateDanas   array        ['broj' => 47, 'zbir' => 48500.0] uspešne uplate danas
+ *   $brojNaCekanju int          koliko uplata čeka potvrdu (za značku)
+ *   adminUplateUrl(status, q)   funkcija – link za filter (zadržava pretragu)
  *   $menze         array        [['id', 'naziv', ...], ...] za izbor menze
  *   $domovi        string[]     ['Dom 1', ...] za izbor doma
  *   $forma         array        ['id' (null = nova), 'naslov', 'tekst', 'ciljna_grupa', 'menza_id', 'dom']
@@ -34,12 +41,37 @@ require_once __DIR__ . '/includes/provera_admina.php';
 require_once __DIR__ . '/src/ObavestenjeRepository.php';
 require_once __DIR__ . '/src/MenzaRepository.php';
 require_once __DIR__ . '/src/SmestajRepository.php';
+require_once __DIR__ . '/src/TransakcijaRepository.php';
 require_once __DIR__ . '/src/Format.php';
 require_once __DIR__ . '/src/Poruka.php';
 
 const MAKS_NASLOV = 150;    // kolona obavestenja.naslov je VARCHAR(150)
 const MAKS_TEKST = 2000;
 const BROJ_U_LISTI = 20;
+const BROJ_UPLATA = 20;
+
+$FILTERI = [
+    '' => 'Sve',
+    'ceka_potvrdu' => 'Čeka potvrdu',
+    'odbijeno' => 'Odbijeno',
+    'uspesno' => 'Uspešno',
+];
+
+$transakcijaRepo = new TransakcijaRepository();
+
+// Filter i pretraga uplata (iz adrese; kod POST-a stižu iz skrivenih polja da se zadrže posle čuvanja)
+$filterStatus = (string)($_POST['filter_status'] ?? $_GET['status'] ?? '');
+if (!isset($FILTERI[$filterStatus])) {
+    $filterStatus = '';
+}
+$pretraga = trim((string)($_POST['filter_q'] ?? $_GET['q'] ?? ''));
+
+/** Link za filter uplata – prazni parametri se izostavljaju */
+function adminUplateUrl(string $status, string $q): string
+{
+    $parametri = array_filter(['status' => $status, 'q' => $q], fn($v) => $v !== '');
+    return 'admin_uplate.php' . ($parametri ? '?' . http_build_query($parametri) : '');
+}
 
 $NAZIVI_GRUPA = [
     'svi' => 'Svi studenti',
@@ -62,9 +94,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $akcija = $_POST['akcija'] ?? '';
     $id = (int)($_POST['id'] ?? 0);
 
+    $nazad = adminUplateUrl($filterStatus, $pretraga);
+
     if (!$adminAuth->validateCsrfToken($_POST['csrf_token'] ?? '')) {
         Poruka::postavi('danger', 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.');
-        header('Location: admin_uplate.php');
+        header('Location: ' . $nazad);
+        exit;
+    }
+
+    // ---------- Uplate: potvrda ili odbijanje ----------
+    if ($akcija === 'potvrdi' || $akcija === 'odbij') {
+        $uspelo = $akcija === 'potvrdi' ? $transakcijaRepo->potvrdiUplatu($id) : $transakcijaRepo->odbijUplatu($id);
+        if (!$uspelo) {
+            Poruka::postavi('danger', 'Uplata ne postoji ili više ne čeka potvrdu.');
+        } elseif ($akcija === 'potvrdi') {
+            Poruka::postavi('success', 'Uplata br. ' . $id . ' je potvrđena – novac je dodat na karticu.');
+        } else {
+            Poruka::postavi('success', 'Uplata br. ' . $id . ' je odbijena.');
+        }
+        header('Location: ' . $nazad);
         exit;
     }
 
@@ -75,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             Poruka::postavi('danger', 'Obaveštenje ne postoji.');
         }
-        header('Location: admin_uplate.php');
+        header('Location: ' . $nazad);
         exit;
     }
 
@@ -131,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $obavestenjeRepo->create($podaci);
                 Poruka::postavi('success', 'Obaveštenje je objavljeno – studenti ga vide na početnoj.');
             }
-            header('Location: admin_uplate.php');
+            header('Location: ' . $nazad);
             exit;
         }
     }
@@ -160,6 +208,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $izmeniId > 0) {
 }
 
 $obavestenja = $obavestenjeRepo->list(['limit' => BROJ_U_LISTI]);
+
+$uplate = $transakcijaRepo->uplateZaAdmina(['status' => $filterStatus, 'pretraga' => $pretraga, 'limit' => BROJ_UPLATA]);
+$uplateDanas = $transakcijaRepo->uplateZaDan(date('Y-m-d'));
+$brojNaCekanju = $transakcijaRepo->brojUplataNaCekanju();
 
 $poruka = Poruka::uzmi();
 

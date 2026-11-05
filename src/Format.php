@@ -91,4 +91,32 @@ class Format
         }
         return $pocetak . ' – ' . date('j', $do) . '. ' . self::MESECI[(int)date('n', $do)] . ' ' . $godina;
     }
+
+    /** Broj transakcije za prikaz: (123, "2026-11-05 12:41:00") -> "TX-2026-11-000123" */
+    public static function brojTransakcije(int $id, string $kreirano): string
+    {
+        return 'TX-' . date('Y-m', strtotime($kreirano)) . '-' . str_pad((string)$id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /** 'platna_kartica' -> "Platnom karticom", 'ips_qr' -> "IPS QR", 'kartica' -> "Sa studentske kartice" */
+    public static function nacinPlacanja(string $nacin): string
+    {
+        $nazivi = [
+            'platna_kartica' => 'Platnom karticom',
+            'ips_qr' => 'IPS QR',
+            'kartica' => 'Sa studentske kartice',
+        ];
+        return $nazivi[$nacin] ?? $nacin;
+    }
+
+    /** 'uspesno' -> "Uspešno", 'ceka_potvrdu' -> "Čeka potvrdu", 'odbijeno' -> "Odbijeno" */
+    public static function statusTransakcije(string $status): string
+    {
+        $nazivi = [
+            'uspesno' => 'Uspešno',
+            'ceka_potvrdu' => 'Čeka potvrdu',
+            'odbijeno' => 'Odbijeno',
+        ];
+        return $nazivi[$status] ?? $status;
+    }
 }
