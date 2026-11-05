@@ -46,9 +46,11 @@ Tako backend i frontend nikad ne menjaju isti fajl i mogu da rade istovremeno.
 index.php                preusmerava na prijavu ili početnu
 login.php / logout.php   prijava brojem kartice i odjava
 pocetna.php              LOGIKA početne: upiti u bazu, promenljive za prikaz
+jelovnik.php             LOGIKA jelovnika: izbor menze i dana (?menza=1&dan=2026-11-05)
 views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)
   login.view.php
   pocetna.view.php
+  jelovnik.view.php
   delovi/                zajednički delovi: zaglavlje.php (<head>), meni.php, podnozje.php
 includes/                provera_prijave.php – zaštita stranica za prijavljene
 src/                     klase: Database, CrudInterface, BaseRepository, Auth, modeli i repozitorijumi
