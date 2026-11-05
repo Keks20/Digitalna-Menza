@@ -85,6 +85,103 @@ class TransakcijaRepository extends BaseRepository
     }
 
     // =================================================================
+    // Istorija transakcija (stranica istorija.php)
+    // =================================================================
+
+    /**
+     * Transakcije jedne kartice za stranicu "Istorija", najnovije prve.
+     * Filter: ['tip' => '' | 'uplata' | 'obroci' | 'smestaj', 'od' => '2026-09-01', 'do' => '2026-10-19',
+     *          'limit' => 10, 'offset' => 0]  – bez limita vraća sve (za izvoz u CSV i PDF).
+     *
+     * @return Transakcija[]
+     */
+    public function istorija(int $karticaId, array $filter = []): array
+    {
+        [$where, $tipovi, $vrednosti] = $this->uslovIstorije($karticaId, $filter);
+        $sql = "SELECT * FROM transakcije WHERE $where ORDER BY kreirano DESC, id DESC";
+
+        if (isset($filter['limit'])) {
+            $sql .= ' LIMIT ? OFFSET ?';
+            $tipovi .= 'ii';
+            $vrednosti[] = (int)$filter['limit'];
+            $vrednosti[] = (int)($filter['offset'] ?? 0);
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param($tipovi, ...$vrednosti);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $transakcije = [];
+        while ($row = $result->fetch_assoc()) {
+            $transakcije[] = $this->mapRow($row);
+        }
+        return $transakcije;
+    }
+
+    /** Koliko transakcija ima za isti filter (za "Prikazano 10 od 24" i broj strana) */
+    public function brojUIstoriji(int $karticaId, array $filter = []): int
+    {
+        [$where, $tipovi, $vrednosti] = $this->uslovIstorije($karticaId, $filter);
+        $stmt = $this->conn->prepare("SELECT COUNT(*) AS broj FROM transakcije WHERE $where");
+        $stmt->bind_param($tipovi, ...$vrednosti);
+        $stmt->execute();
+        return (int)$stmt->get_result()->fetch_assoc()['broj'];
+    }
+
+    /**
+     * Zbir uspešnih transakcija po tipu u periodu: ['uplata' => 10000.0, 'obroci' => -5320.0, 'smestaj' => -2800.0]
+     * Uplate su pozitivne, a obroci i smeštaj negativni (tako su i upisani).
+     */
+    public function zbirPoTipu(int $karticaId, string $od, string $do): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT tip, SUM(iznos) AS zbir
+             FROM transakcije
+             WHERE kartica_id = ? AND status = 'uspesno'
+               AND kreirano >= ? AND kreirano < DATE_ADD(?, INTERVAL 1 DAY)
+             GROUP BY tip"
+        );
+        $stmt->bind_param('iss', $karticaId, $od, $do);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $zbirovi = ['uplata' => 0.0, 'obroci' => 0.0, 'smestaj' => 0.0];
+        while ($row = $result->fetch_assoc()) {
+            $zbirovi[$row['tip']] = (float)$row['zbir'];
+        }
+        return $zbirovi;
+    }
+
+    /**
+     * Zajednički WHERE za istoriju: [sql, tipovi za bind_param, vrednosti].
+     * Datum "do" je uključen ceo dan (do ponoći sledećeg dana).
+     */
+    private function uslovIstorije(int $karticaId, array $filter): array
+    {
+        $where = 'kartica_id = ?';
+        $tipovi = 'i';
+        $vrednosti = [$karticaId];
+
+        if (($filter['tip'] ?? '') !== '') {
+            $where .= ' AND tip = ?';
+            $tipovi .= 's';
+            $vrednosti[] = $filter['tip'];
+        }
+        if (($filter['od'] ?? '') !== '') {
+            $where .= ' AND kreirano >= ?';
+            $tipovi .= 's';
+            $vrednosti[] = $filter['od'];
+        }
+        if (($filter['do'] ?? '') !== '') {
+            $where .= ' AND kreirano < DATE_ADD(?, INTERVAL 1 DAY)';
+            $tipovi .= 's';
+            $vrednosti[] = $filter['do'];
+        }
+        return [$where, $tipovi, $vrednosti];
+    }
+
+    // =================================================================
     // Uplate (dopuna kartice)
     // =================================================================
 
