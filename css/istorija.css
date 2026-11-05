@@ -1,0 +1,161 @@
+/* =========================================================
+   Istorija transakcija (Figma: Istorija-racunar, Istorija-telefon)
+   Učitava se posle style.css i jelovnik.css (.btn-choice, .empty-state).
+   ========================================================= */
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.btn-choice {
+  text-decoration: none;
+}
+
+/* ---------- Filter ---------- */
+.history-period .app-input {
+  width: auto;
+  min-width: 150px;
+  flex: 1 1 150px;
+}
+
+.history-filter .btn-app .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Zbirovi ---------- */
+.sum-card {
+  padding: 22px;
+}
+
+.sum-value {
+  margin-top: 16px !important;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.sum-label {
+  margin-top: 6px !important;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- Tabela ---------- */
+.tx-head,
+.tx-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  column-gap: 14px;
+  align-items: center;
+}
+
+.tx-head {
+  padding: 12px 10px;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  background: #f3f5f8;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.tx-row {
+  padding: 14px 10px;
+  border-bottom: 1px solid #eceff4;
+  font-size: 14.5px;
+}
+
+/* Tip i stanje posle se na telefonu ne vide (kao u Figmi) */
+.tx-col-tip,
+.tx-col-stanje {
+  display: none;
+}
+
+.tx-date {
+  color: var(--text);
+  font-size: 13.5px;
+}
+
+.tx-desc .tag {
+  margin-left: 4px;
+}
+
+.tx-amount {
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tx-plus {
+  color: #23884c;
+}
+
+.tx-muted {
+  color: #9aa1b1;
+}
+
+.tx-strike {
+  text-decoration: line-through;
+}
+
+.tx-balance {
+  color: var(--muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tx-foot {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.tx-page {
+  min-width: 48px;
+  text-align: center;
+  font-size: 14px;
+}
+
+@media (min-width: 992px) {
+  .tx-head,
+  .tx-row {
+    grid-template-columns: 110px minmax(0, 1fr) 110px 140px 140px;
+    column-gap: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .tx-col-tip,
+  .tx-col-stanje {
+    display: block;
+  }
+}
+
+/* ---------- Štampa (Izvezi PDF) ---------- */
+@media print {
+  .tx-head,
+  .tx-row {
+    grid-template-columns: 90px minmax(0, 1fr) 80px 110px 110px;
+    column-gap: 12px;
+    font-size: 12px;
+  }
+
+  .tx-col-tip,
+  .tx-col-stanje {
+    display: block;
+  }
+
+  .tx-row {
+    break-inside: avoid;
+  }
+
+  .sum-card {
+    padding: 14px;
+  }
+
+  .sum-value {
+    font-size: 18px;
+  }
+}

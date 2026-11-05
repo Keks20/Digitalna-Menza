@@ -119,4 +119,29 @@ class Format
         ];
         return $nazivi[$status] ?? $status;
     }
+
+    /** 'uplata' -> "Uplata", 'obroci' -> "Obroci", 'smestaj' -> "Smeštaj" */
+    public static function tipTransakcije(string $tip): string
+    {
+        $nazivi = [
+            'uplata' => 'Uplata',
+            'obroci' => 'Obroci',
+            'smestaj' => 'Smeštaj',
+        ];
+        return $nazivi[$tip] ?? $tip;
+    }
+
+    /** Reč posle broja: (1, 'transakcija', 'transakcije', 'transakcija') -> "transakcija", 2 -> "transakcije", 5 -> "transakcija" */
+    public static function mnozina(int $broj, string $jedan, string $dvaDoCetiri, string $pet): string
+    {
+        $poslednje = $broj % 10;
+        $poslednjaDva = $broj % 100;
+        if ($poslednje === 1 && $poslednjaDva !== 11) {
+            return $jedan;
+        }
+        if ($poslednje >= 2 && $poslednje <= 4 && ($poslednjaDva < 12 || $poslednjaDva > 14)) {
+            return $dvaDoCetiri;
+        }
+        return $pet;
+    }
 }
