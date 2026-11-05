@@ -2,12 +2,13 @@
 
 require_once __DIR__ . '/BaseRepository.php';
 require_once __DIR__ . '/Transakcija.php';
+require_once __DIR__ . '/Format.php';
 
 /**
  * Evidencija novca.
  *
  * Obični create() samo upisuje red i NE menja stanje kartice. Novac se pomera
- * metodama uplati() i potvrdiUplatu(): one u jednoj transakciji baze menjaju
+ * metodama uplati(), potvrdiUplatu() i kupiObroke(): one u jednoj transakciji baze menjaju
  * stanje kartice i upisuju transakciju, pa stanje i istorija nikad ne mogu da se razilaze.
  */
 class TransakcijaRepository extends BaseRepository
@@ -352,6 +353,82 @@ class TransakcijaRepository extends BaseRepository
      * Dodaje iznos na stanje kartice i vraća novo stanje.
      * Poziva se samo unutar otvorene transakcije baze (red kartice ostaje zaključan do commit-a).
      */
+    // =================================================================
+    // Kupovina obroka (plaćanje sa studentske kartice)
+    // =================================================================
+
+    /**
+     * Kupovina mesečnih obroka: u jednoj transakciji baze skida novac sa kartice,
+     * upisuje transakciju tipa 'obroci' i pakete u kupljeni_obroci.
+     *
+     * $stavke: [tip_obroka_id => ['kolicina' => 10, 'cena' => 120.0], ...] – samo tipovi sa kolicinom > 0
+     * $najviseUMesecu: koliko obroka jednog tipa sme da bude kupljeno za ceo mesec (broj dana u mesecu)
+     *
+     * Vraća id transakcije. Baca RuntimeException sa porukom za studenta kad nema dovoljno novca,
+     * kad je kartica blokirana ili kad bi se prešlo ograničenje za mesec.
+     */
+    public function kupiObroke(int $karticaId, string $mesec, array $stavke, int $najviseUMesecu, string $opis): int
+    {
+        $ukupno = 0.0;
+        foreach ($stavke as $stavka) {
+            $ukupno += $stavka['kolicina'] * $stavka['cena'];
+        }
+        $ukupno = round($ukupno, 2);
+
+        $this->conn->begin_transaction();
+        try {
+            // Red kartice se zaključava – dve kupovine u isto vreme ne mogu obe da prođu sa istim novcem
+            $stmt = $this->conn->prepare('SELECT stanje, status FROM kartice WHERE id = ? FOR UPDATE');
+            $stmt->bind_param('i', $karticaId);
+            $stmt->execute();
+            $kartica = $stmt->get_result()->fetch_assoc();
+            if (!$kartica) {
+                throw new RuntimeException('Kartica ne postoji.');
+            }
+            if ($kartica['status'] !== 'aktivna') {
+                throw new RuntimeException('Kartica je blokirana – obratite se Studentskom centru.');
+            }
+            if ((float)$kartica['stanje'] < $ukupno) {
+                throw new RuntimeException('Nema dovoljno novca na kartici. Potrebno je ' . Format::novac($ukupno)
+                    . ', a na kartici je ' . Format::novac($kartica['stanje']) . '.');
+            }
+
+            // Ograničenje po mesecu se proverava ponovo ovde, posle zaključavanja kartice
+            $stmt = $this->conn->prepare('SELECT COALESCE(SUM(kolicina), 0) AS kupljeno FROM kupljeni_obroci WHERE kartica_id = ? AND tip_obroka_id = ? AND mesec = ?');
+            foreach ($stavke as $tipId => $stavka) {
+                $stmt->bind_param('iis', $karticaId, $tipId, $mesec);
+                $stmt->execute();
+                $kupljeno = (int)$stmt->get_result()->fetch_assoc()['kupljeno'];
+                if ($kupljeno + $stavka['kolicina'] > $najviseUMesecu) {
+                    throw new RuntimeException('Za jedan mesec može da se kupi najviše ' . $najviseUMesecu . ' obroka svake vrste.');
+                }
+            }
+
+            $novoStanje = $this->dodajNaStanje($karticaId, -$ukupno);
+
+            $tip = 'obroci';
+            $nacin = 'kartica';
+            $status = 'uspesno';
+            $iznos = -$ukupno;
+            $stmt = $this->conn->prepare('INSERT INTO transakcije (kartica_id, tip, nacin, iznos, stanje_posle, status, opis) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param('issddss', $karticaId, $tip, $nacin, $iznos, $novoStanje, $status, $opis);
+            $stmt->execute();
+            $transakcijaId = $this->conn->insert_id;
+
+            $stmt = $this->conn->prepare('INSERT INTO kupljeni_obroci (kartica_id, tip_obroka_id, mesec, kolicina, cena_po_obroku, transakcija_id) VALUES (?, ?, ?, ?, ?, ?)');
+            foreach ($stavke as $tipId => $stavka) {
+                $stmt->bind_param('iisidi', $karticaId, $tipId, $mesec, $stavka['kolicina'], $stavka['cena'], $transakcijaId);
+                $stmt->execute();
+            }
+
+            $this->conn->commit();
+            return $transakcijaId;
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            throw $e;
+        }
+    }
+
     private function dodajNaStanje(int $karticaId, float $iznos): float
     {
         $stmt = $this->conn->prepare('SELECT stanje FROM kartice WHERE id = ? FOR UPDATE');

@@ -68,4 +68,24 @@ class KupljeniObrokRepository extends BaseRepository
         }
         return $stanje;
     }
+
+    /**
+     * Poslednji izdati obroci (za "Poslednja iskorišćenja" na stranici Moji obroci), najnoviji prvi:
+     * [['tip_obroka_id' => 1, 'obrok' => 'Doručak', 'menza' => 'Menza Ekonomski', 'iskorisceno' => '2026-10-13 08:12:00'], ...]
+     */
+    public function poslednjaIskoriscenja(int $karticaId, int $limit = 5): array
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT i.tip_obroka_id, t.naziv AS obrok, m.naziv AS menza, i.iskorisceno
+             FROM iskorisceni_obroci i
+             JOIN tipovi_obroka t ON t.id = i.tip_obroka_id
+             JOIN menze m ON m.id = i.menza_id
+             WHERE i.kartica_id = ?
+             ORDER BY i.iskorisceno DESC, i.id DESC
+             LIMIT ?'
+        );
+        $stmt->bind_param('ii', $karticaId, $limit);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 }

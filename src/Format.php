@@ -51,6 +51,12 @@ class Format
         return self::MESECI[(int)date('n', strtotime($datum))];
     }
 
+    /** "2026-11-01" -> "novembar 2026" */
+    public static function mesecGodina(string $datum): string
+    {
+        return self::mesec($datum) . ' ' . date('Y', strtotime($datum));
+    }
+
     /** "07:00:00" -> "07:00" */
     public static function vreme(string $vreme): string
     {
