@@ -1,0 +1,561 @@
+/* =========================================================
+   Početna strana studenta (Figma: Pocetna-racunar / Pocetna-telefon)
+   Učitava se samo na početnoj, posle style.css.
+   ========================================================= */
+
+.app-main {
+  max-width: 1200px;
+  padding: 32px 48px 48px 40px;
+}
+
+.app-main p {
+  margin: 0;
+}
+
+.app-main h1,
+.app-main h2,
+.app-main h3 {
+  color: var(--text);
+}
+
+/* ---------- Zaglavlje ---------- */
+.page-header {
+  margin-bottom: 26px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.page-date {
+  margin-top: 4px !important;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.btn-bell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+}
+
+.btn-bell .ikonica {
+  width: 18px;
+  height: 18px;
+}
+
+.bell-dot {
+  position: absolute;
+  top: 10px;
+  right: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e8832a;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #e4ecfa;
+  color: var(--blue-dark);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.user-sub {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* ---------- Kartica sa stanjem ---------- */
+.balance-card {
+  position: relative;
+  min-height: 364px;
+  padding: 24px 22px 22px;
+  border-radius: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #0c2749 0%, #154282 50%, #1e5dbc 100%);
+  box-shadow: 0 6px 18px rgba(11, 37, 69, 0.14);
+}
+
+.balance-chip {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 44px;
+  height: 32px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f0cf72 0%, #d6a945 100%);
+}
+
+.balance-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.balance-amount {
+  margin-top: 6px !important;
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.15;
+}
+
+.balance-amount span {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.85;
+}
+
+.balance-number {
+  margin-bottom: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (min-width: 992px) {
+  .balance-number {
+    margin-bottom: 96px !important;
+  }
+}
+
+.btn-balance {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #fff;
+  border: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-balance:hover,
+.btn-balance:focus-visible {
+  background: #eef3fc;
+  color: var(--text);
+}
+
+.btn-balance .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Male kartice ---------- */
+.stat-card,
+.panel {
+  background: #fff;
+  border: 1px solid #eceff4;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.stat-card {
+  padding: 22px;
+}
+
+.stat-value {
+  margin-top: 16px !important;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.stat-value span {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.stat-label {
+  margin-top: 8px !important;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Kvadrat sa ikonicom u pastelnoj boji */
+.tint-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.tint-box .ikonica {
+  width: 19px;
+  height: 19px;
+}
+
+.tint-blue   { background: #e6eefb; color: #2a62c4; }
+.tint-orange { background: #fdf0e1; color: #e8832a; }
+.tint-green  { background: #e3f5ea; color: #2f9e5b; }
+
+/* ---------- Paneli ---------- */
+.panel {
+  padding: 22px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.panel-link:hover {
+  text-decoration: underline;
+}
+
+.panel-link .ikonica {
+  width: 15px;
+  height: 15px;
+}
+
+/* Tabovi sa menzama */
+.menza-tabs {
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  background: #f3f5f8;
+  border-radius: 10px;
+}
+
+.menza-tabs .nav-link {
+  flex: 1 1 0;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.menza-tabs .nav-link:hover {
+  color: var(--text);
+}
+
+.menza-tabs .nav-link.active {
+  background: #fff;
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(11, 37, 69, 0.1);
+}
+
+/* Obroci u jelovniku */
+.meal-row {
+  display: flex;
+  gap: 16px;
+  padding: 18px 0 20px;
+  border-top: 1px solid #eceff4;
+}
+
+.meal-row:last-child {
+  padding-bottom: 4px;
+}
+
+.meal-time {
+  width: 104px;
+  flex-shrink: 0;
+}
+
+.meal-time strong {
+  display: block;
+  font-size: 15px;
+}
+
+.meal-time span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.meal-items {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.meal-items li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.meal-items li + li {
+  margin-top: 8px;
+}
+
+.meal-items li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.meal-items li.meal-empty::before {
+  display: none;
+}
+
+.meal-empty {
+  padding-left: 0 !important;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Oznake (Posno i sl.) */
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+
+.tag-green {
+  background: #e3f5ea;
+  color: #23884c;
+}
+
+/* ---------- Moji obroci ---------- */
+.meal-balance {
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #f3f5f8;
+}
+
+.meal-balance + .meal-balance {
+  margin-top: 12px;
+}
+
+.meal-balance strong {
+  font-size: 15px;
+}
+
+.meal-count {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.meal-count b {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.meal-progress {
+  height: 6px;
+  margin-top: 10px;
+  background: #e1e6ee;
+  border-radius: 99px;
+}
+
+.meal-progress .progress-bar {
+  background: var(--blue);
+  border-radius: 99px;
+}
+
+.valid-until {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.valid-until b {
+  color: var(--text);
+}
+
+.valid-until .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--blue);
+  border-color: var(--blue);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-qr:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-hover);
+}
+
+.btn-qr .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Poruke ---------- */
+.message {
+  gap: 16px;
+  padding: 22px 0 20px;
+  border-top: 1px solid #eceff4;
+}
+
+.message:last-child {
+  padding-bottom: 0;
+}
+
+.message-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.message-text {
+  margin-top: 4px !important;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.message-meta {
+  margin-top: 4px !important;
+  color: #7c8496;
+  font-size: 12.5px;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 991.98px) {
+  .app-main {
+    max-width: none;
+    padding: 24px 16px 28px;
+  }
+
+  .page-header {
+    margin-bottom: 22px;
+  }
+
+  .page-title {
+    font-size: 21px;
+  }
+
+  .balance-card {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .balance-chip {
+    top: 18px;
+    right: 18px;
+    width: 42px;
+    height: 30px;
+  }
+
+  .balance-amount {
+    margin-top: 4px !important;
+    font-size: 34px;
+  }
+
+  .balance-amount span {
+    font-size: 17px;
+  }
+
+  .balance-number {
+    margin: 8px 0 18px !important;
+    font-size: 12px;
+  }
+
+  .btn-balance {
+    align-self: stretch;
+    justify-content: center;
+    height: 42px;
+  }
+
+  .stat-card,
+  .panel {
+    padding: 18px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  /* Na telefonu je vreme obroka iznad jela */
+  .meal-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .meal-time {
+    width: auto;
+  }
+
+  .meal-time span {
+    margin-top: 2px;
+    font-size: 12.5px;
+  }
+
+  .menza-tabs .nav-link {
+    font-size: 13.5px;
+  }
+}
