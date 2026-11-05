@@ -39,10 +39,17 @@ za tekući mesec). Pred odbranu je dovoljno ponovo uvesti `schema.sql` pa `seed.
 
 ## Struktura
 
+Svaka stranica ima **dva fajla**: logiku (backend) u korenu i izgled (frontend) u `views/`.
+Tako backend i frontend nikad ne menjaju isti fajl i mogu da rade istovremeno.
+
 ```
 index.php                preusmerava na prijavu ili početnu
 login.php / logout.php   prijava brojem kartice i odjava
-pocetna.php              početna strana studenta
+pocetna.php              LOGIKA početne: upiti u bazu, promenljive za prikaz
+views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)
+  login.view.php
+  pocetna.view.php
+  delovi/                zajednički delovi: zaglavlje.php (<head>), meni.php, podnozje.php
 includes/                provera_prijave.php – zaštita stranica za prijavljene
 src/                     klase: Database, CrudInterface, BaseRepository, Auth, modeli i repozitorijumi
 db/                      schema.sql (struktura) i seed.sql (test podaci)
@@ -53,15 +60,41 @@ config.php               podešavanja baze (config.sample.php / config.local.php
 Svaka tabela ima model (npr. `Kartica`) i repozitorijum (npr. `KarticaRepository`) koji nasleđuje
 apstraktni `BaseRepository`, a on implementira `CrudInterface` (create, read, update, delete, list).
 
-## Nova stranica za prijavljene
+| Ko | Menja |
+| --- | --- |
+| Backend (Luka) | `src/`, `db/`, `includes/`, stranice u korenu (`pocetna.php`…) |
+| Frontend (kolega) | `views/`, `css/`, `js/` |
+
+## Nova stranica
+
+**1. Logika** – npr. `jelovnik.php` u korenu. Na vrhu je komentar sa spiskom promenljivih koje prikaz dobija:
 
 ```php
 <?php
+/**
+ * LOGIKA: jelovnik (backend).
+ * Prikaz dobija: $menze, $jelovnik, $tipoviObroka
+ */
 require_once __DIR__ . '/includes/provera_prijave.php';   // daje $auth, $studentId, $karticaId
-require_once __DIR__ . '/src/KarticaRepository.php';
+require_once __DIR__ . '/src/JelovnikRepository.php';
 
-$kartica = (new KarticaRepository())->read($karticaId);
-?>
+$jelovnik = (new JelovnikRepository())->zaDan($menzaId, $dan);
+
+require __DIR__ . '/views/jelovnik.view.php';
 ```
 
+**2. Izgled** – `views/jelovnik.view.php` koristi samo te promenljive:
 
+```php
+<?php
+$naslovStrane = 'Jelovnik';
+$aktivnaStrana = 'jelovnik.php';
+require __DIR__ . '/delovi/zaglavlje.php';
+require __DIR__ . '/delovi/meni.php';
+?>
+  <main> ... <?php echo htmlspecialchars($stavka->jelo); ?> ... </main>
+<?php require __DIR__ . '/delovi/podnozje.php'; ?>
+```
+
+Meni sam prikaže link ka novoj stranici čim njen fajl postoji u korenu.
+Folder `views/` je zaštićen sa `.htaccess`, pa se prikaz ne može otvoriti direktno iz pregledača.
