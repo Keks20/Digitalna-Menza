@@ -12,10 +12,28 @@
 }
 
 /* ---------- Filter ---------- */
-.history-period .app-input {
-  width: auto;
-  min-width: 150px;
-  flex: 1 1 150px;
+/* Datumi od–do uvek u jednom redu, dugme "Prikaži" na telefonu ide ispod njih */
+.period-dates {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 300px;
+}
+
+.period-dates .app-input {
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.period-btn {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 576px) {
+  .period-btn {
+    flex: 0 0 auto;
+  }
 }
 
 .history-filter .btn-app .ikonica {
@@ -135,6 +153,21 @@
 
 /* ---------- Štampa (Izvezi PDF) ---------- */
 @media print {
+  /* Tabela sme da se lomi na više strana (inače cela prelazi na drugu stranu) */
+  .tx-panel {
+    break-inside: auto;
+    padding: 0;
+    border: 0;
+  }
+
+  /* Boje oznaka i zbirova ostaju i u PDF-u */
+  .tag,
+  .tint-box,
+  .tx-head {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .tx-head,
   .tx-row {
     grid-template-columns: 90px minmax(0, 1fr) 80px 110px 110px;
