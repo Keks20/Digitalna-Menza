@@ -50,19 +50,22 @@ index.php                preusmerava na prijavu ili početnu
 login.php / logout.php   prijava brojem kartice i odjava
 pocetna.php              LOGIKA početne: upiti u bazu, promenljive za prikaz
 jelovnik.php             LOGIKA jelovnika: izbor menze i dana (?menza=1&dan=2026-11-05)
+obavestenja.php          sva obaveštenja za studenta (sve, menze i njegov dom)
 admin_login.php          prijava zaposlenih (admin i kasir), admin_logout.php – odjava
 admin_pocetna.php        administratorski pregled (samo admin)
 admin_jelovnik.php       unos jelovnika po danu i menzi (nacrt / objava, kopiranje od juče) i cene obroka
+admin_uplate.php         obaveštenja za studente (objava, izmena, brisanje); uplate se dodaju uz dopunu
 kasir_bonovi.php         provera QR bonova (kasir i admin)
 views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)
   login.view.php
   pocetna.view.php
   jelovnik.view.php
-  admin_login.view.php, admin_pocetna.view.php, admin_jelovnik.view.php, kasir_bonovi.view.php
+  obavestenja.view.php
+  admin_login.view.php, admin_pocetna.view.php, admin_jelovnik.view.php, admin_uplate.view.php, kasir_bonovi.view.php
   delovi/                zajednički delovi: zaglavlje.php (<head>), meni.php, admin_meni.php, podnozje.php
 includes/                provera_prijave.php (student) i provera_admina.php (zaposleni, po ulozi)
 src/                     klase: Database, CrudInterface, BaseRepository, BaseAuth (Auth, AdminAuth),
-                         Format i Kalendar (pomoćne), modeli i repozitorijumi
+                         Format, Kalendar i Poruka (pomoćne), modeli i repozitorijumi
 db/                      schema.sql (struktura) i seed.sql (test podaci)
 css/, js/                stilovi i JavaScript
 config.php               podešavanja baze (config.sample.php / config.local.php)

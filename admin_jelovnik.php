@@ -40,6 +40,7 @@ require_once __DIR__ . '/src/MenzaRepository.php';
 require_once __DIR__ . '/src/TipObrokaRepository.php';
 require_once __DIR__ . '/src/JelovnikRepository.php';
 require_once __DIR__ . '/src/Format.php';
+require_once __DIR__ . '/src/Poruka.php';
 require_once __DIR__ . '/src/Kalendar.php';
 
 const BROJ_JELA = 3;          // toliko polja po obroku (kao u Figmi)
@@ -77,12 +78,6 @@ function adminJelovnikUrl(int $menzaId, string $dan): string
     return 'admin_jelovnik.php?' . http_build_query(['menza' => $menzaId, 'dan' => $dan]);
 }
 
-/** Poruka koja preživi preusmeravanje (prikazuje se jednom) */
-function postaviPoruku(string $tip, string $tekst): void
-{
-    $_SESSION['poruka'] = ['tip' => $tip, 'tekst' => $tekst];
-}
-
 /** Prazna forma: BROJ_JELA praznih redova za svaki obrok */
 function praznaForma(array $tipoviObroka): array
 {
@@ -116,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nazad = adminJelovnikUrl($izabranaMenzaId, $izabraniDan);
 
     if (!$adminAuth->validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        postaviPoruku('danger', 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.');
+        Poruka::postavi('danger', 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.');
         header('Location: ' . $nazad);
         exit;
     }
@@ -154,11 +149,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($greske)) {
             $jelovnikRepo->sacuvajDan($izabranaMenzaId, $izabraniDan, $zaCuvanje, $objavi);
             if ($brojJela === 0) {
-                postaviPoruku('success', 'Jelovnik za ' . Format::datum($izabraniDan) . ' je obrisan.');
+                Poruka::postavi('success', 'Jelovnik za ' . Format::datum($izabraniDan) . ' je obrisan.');
             } elseif ($objavi) {
-                postaviPoruku('success', 'Jelovnik za ' . Format::datum($izabraniDan) . ' je objavljen – studenti ga vide.');
+                Poruka::postavi('success', 'Jelovnik za ' . Format::datum($izabraniDan) . ' je objavljen – studenti ga vide.');
             } else {
-                postaviPoruku('success', 'Jelovnik za ' . Format::datum($izabraniDan) . ' je sačuvan kao nacrt (studenti ga još ne vide).');
+                Poruka::postavi('success', 'Jelovnik za ' . Format::datum($izabraniDan) . ' je sačuvan kao nacrt (studenti ga još ne vide).');
             }
             header('Location: ' . $nazad);
             exit;
@@ -172,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $jelovnikJuce = $jelovnikRepo->zaDanSvi($izabranaMenzaId, $juce);
 
         if (empty($jelovnikJuce)) {
-            postaviPoruku('danger', 'Za ' . Format::datum($juce) . ' nema jelovnika koji bi se kopirao.');
+            Poruka::postavi('danger', 'Za ' . Format::datum($juce) . ' nema jelovnika koji bi se kopirao.');
         } else {
             $stavke = [];
             foreach ($jelovnikJuce as $tipId => $jela) {
@@ -181,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             $jelovnikRepo->sacuvajDan($izabranaMenzaId, $izabraniDan, $stavke, false);
-            postaviPoruku('success', 'Jela od ' . Format::datum($juce) . ' su kopirana kao nacrt – proveri ih pa objavi.');
+            Poruka::postavi('success', 'Jela od ' . Format::datum($juce) . ' su kopirana kao nacrt – proveri ih pa objavi.');
         }
         header('Location: ' . $nazad);
         exit;
@@ -212,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]);
                 }
             }
-            postaviPoruku('success', 'Cene su sačuvane i važe od sada. Već kupljeni obroci zadržavaju staru cenu.');
+            Poruka::postavi('success', 'Cene su sačuvane i važe od sada. Već kupljeni obroci zadržavaju staru cenu.');
             header('Location: ' . $nazad);
             exit;
         }
@@ -224,8 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // =====================================================================
 
 // Poruka iz prethodnog zahteva (posle preusmeravanja) – prikazuje se samo jednom
-$poruka = $_SESSION['poruka'] ?? null;
-unset($_SESSION['poruka']);
+$poruka = Poruka::uzmi();
 
 // Dugmad za menze: link zadržava izabrani dan
 foreach ($menze as $i => $menza) {
