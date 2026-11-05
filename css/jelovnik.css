@@ -1,0 +1,324 @@
+/* =========================================================
+   Jelovnik (Figma: Jelovnik-racunar / Jelovnik-telefon)
+   Učitava se samo na jelovniku, posle style.css.
+   ========================================================= */
+
+/* Strelice za prethodnu / sledeću nedelju pored datuma */
+.week-nav {
+  margin-top: 3px;
+}
+
+.week-arrow {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.week-arrow:hover {
+  background: #e6eefb;
+  color: var(--blue);
+}
+
+.week-arrow .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Izbor menze i dana ---------- */
+.picker {
+  padding: 22px;
+}
+
+/* Dugme za izbor (menza, PDF) */
+.btn-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 28px;
+  border: 1px solid #dfe3eb;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.btn-choice:hover {
+  border-color: #b9c6dd;
+  color: var(--text);
+}
+
+.btn-choice.active {
+  background: #e6eefb;
+  border: 1.5px solid var(--blue);
+  color: #12346b;
+}
+
+.btn-choice:focus-visible {
+  outline: 3px solid rgba(30, 95, 192, 0.3);
+  outline-offset: 2px;
+}
+
+.btn-choice .ikonica {
+  width: 17px;
+  height: 17px;
+}
+
+/* Dani u nedelji */
+.day-strip {
+  gap: 10px;
+}
+
+.day-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid #dfe3eb;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.day-btn:hover {
+  border-color: #b9c6dd;
+  color: var(--text);
+}
+
+.day-name {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.day-num {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* Današnji dan (kad nije izabran) – plavi okvir */
+.day-btn.today {
+  border-color: var(--blue);
+}
+
+.day-btn.today .day-name {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.day-btn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.day-btn.active .day-name {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.day-btn:focus-visible {
+  outline: 3px solid rgba(30, 95, 192, 0.3);
+  outline-offset: 2px;
+}
+
+/* ---------- Kartice obroka ---------- */
+.meal-card {
+  padding: 22px;
+}
+
+.meal-card-head {
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e8ebf1;
+}
+
+.meal-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.meal-hours {
+  margin-top: 1px !important;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.meal-price {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dish-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dish-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 53px;
+  padding: 10px 0;
+  font-size: 15px;
+}
+
+.dish-list li + li {
+  border-top: 1px solid #e8ebf1;
+}
+
+.dish-list li:last-child {
+  padding-bottom: 0;
+  min-height: 43px;
+}
+
+.dish-name {
+  position: relative;
+  padding-left: 16px;
+  line-height: 1.35;
+}
+
+.dish-name::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.dish-list .tag {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+.dish-empty {
+  color: var(--muted);
+  font-size: 14px !important;
+}
+
+/* Prazno stanje (jelovnik nije objavljen) */
+.empty-state {
+  padding: 40px 22px;
+}
+
+.empty-title {
+  margin-top: 14px !important;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.empty-text {
+  max-width: 440px;
+  margin: 6px auto 0 !important;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 991.98px) {
+  .picker,
+  .meal-card {
+    padding: 18px;
+  }
+
+  .btn-choice {
+    height: 40px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+
+  .btn-pdf {
+    font-weight: 500;
+  }
+
+  .day-strip {
+    gap: 6px;
+  }
+
+  .day-btn {
+    height: 56px;
+    border-radius: 9px;
+  }
+
+  .day-name {
+    font-size: 12px;
+  }
+
+  .day-num {
+    font-size: 17px;
+  }
+}
+
+@media print {
+  .picker,
+  .day-strip {
+    display: none !important;
+  }
+}
+
+.print-week-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.print-week table {
+  font-size: 12px;
+}
+
+/* Zaglavlje: naslov i nedelja levo, korisnik desno.
+   Na telefonu nedelja sa strelicama ide u ceo red ispod. */
+.jel-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "title user"
+    "week  user";
+  column-gap: 16px;
+  align-items: center;
+}
+
+.jel-title { grid-area: title; }
+.jel-week  { grid-area: week; }
+.jel-user  { grid-area: user; }
+
+.jel-week .page-date {
+  white-space: nowrap;
+}
+
+@media (max-width: 991.98px) {
+  .jel-header {
+    grid-template-areas:
+      "title user"
+      "week  week";
+  }
+
+  .jel-week {
+    margin-top: -6px;
+  }
+
+  .jel-user .gap-3 {
+    gap: 10px !important;
+  }
+}

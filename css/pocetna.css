@@ -3,90 +3,6 @@
    Učitava se samo na početnoj, posle style.css.
    ========================================================= */
 
-.app-main {
-  max-width: 1200px;
-  padding: 32px 48px 48px 40px;
-}
-
-.app-main p {
-  margin: 0;
-}
-
-.app-main h1,
-.app-main h2,
-.app-main h3 {
-  color: var(--text);
-}
-
-/* ---------- Zaglavlje ---------- */
-.page-header {
-  margin-bottom: 26px;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-
-.page-date {
-  margin-top: 4px !important;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.btn-bell {
-  position: relative;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid var(--border);
-  color: var(--text);
-  display: grid;
-  place-items: center;
-}
-
-.btn-bell .ikonica {
-  width: 18px;
-  height: 18px;
-}
-
-.bell-dot {
-  position: absolute;
-  top: 10px;
-  right: 11px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #e8832a;
-  box-shadow: 0 0 0 1.5px #fff;
-}
-
-.avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #e4ecfa;
-  color: var(--blue-dark);
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.user-name {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.user-sub {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
 /* ---------- Kartica sa stanjem ---------- */
 .balance-card {
   position: relative;
@@ -169,14 +85,6 @@
 }
 
 /* ---------- Male kartice ---------- */
-.stat-card,
-.panel {
-  background: #fff;
-  border: 1px solid #eceff4;
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
-}
-
 .stat-card {
   padding: 22px;
 }
@@ -201,64 +109,7 @@
   line-height: 1.5;
 }
 
-/* Kvadrat sa ikonicom u pastelnoj boji */
-.tint-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.tint-box .ikonica {
-  width: 19px;
-  height: 19px;
-}
-
-.tint-blue   { background: #e6eefb; color: #2a62c4; }
-.tint-orange { background: #fdf0e1; color: #e8832a; }
-.tint-green  { background: #e3f5ea; color: #2f9e5b; }
-
 /* ---------- Paneli ---------- */
-.panel {
-  padding: 22px;
-}
-
-.panel-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.panel-head h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.panel-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--blue);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.panel-link:hover {
-  text-decoration: underline;
-}
-
-.panel-link .ikonica {
-  width: 15px;
-  height: 15px;
-}
-
 /* Tabovi sa menzama */
 .menza-tabs {
   flex-wrap: nowrap;
@@ -357,22 +208,6 @@
   padding-left: 0 !important;
   color: var(--muted);
   font-size: 14px;
-}
-
-/* Oznake (Posno i sl.) */
-.tag {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 600;
-  vertical-align: 1px;
-}
-
-.tag-green {
-  background: #e3f5ea;
-  color: #23884c;
 }
 
 /* ---------- Moji obroci ---------- */
@@ -486,19 +321,6 @@
 
 /* ---------- Telefon ---------- */
 @media (max-width: 991.98px) {
-  .app-main {
-    max-width: none;
-    padding: 24px 16px 28px;
-  }
-
-  .page-header {
-    margin-bottom: 22px;
-  }
-
-  .page-title {
-    font-size: 21px;
-  }
-
   .balance-card {
     min-height: 0;
     padding: 18px;
@@ -531,8 +353,7 @@
     height: 42px;
   }
 
-  .stat-card,
-  .panel {
+  .stat-card {
     padding: 18px;
   }
 

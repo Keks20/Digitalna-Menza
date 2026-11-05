@@ -33,6 +33,9 @@ if (!function_exists('ikonica')) {
             'upozorenje' => '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
             'megafon'    => '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
             'meni'       => '<path d="M4 6h16M4 12h16M4 18h16"/>',
+            'levo'       => '<path d="m15 18-6-6 6-6"/>',
+            'info'       => '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+            'preuzmi'    => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
         ];
 
         $sadrzaj = $putanje[$ime] ?? '';

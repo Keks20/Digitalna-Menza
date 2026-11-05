@@ -42,19 +42,7 @@ $izgledObroka = [
         <p class="page-date"><?php echo Format::danSaDatumom($danas); ?></p>
       </div>
 
-      <div class="d-flex align-items-center gap-3">
-        <button type="button" class="btn-bell" aria-label="Obaveštenja">
-          <?php echo ikonica('zvono'); ?>
-          <?php if (!empty($poruke)): ?><span class="bell-dot"></span><?php endif; ?>
-        </button>
-        <span class="avatar"><?php echo htmlspecialchars($student->inicijali()); ?></span>
-        <div class="d-none d-lg-block">
-          <div class="user-name"><?php echo htmlspecialchars($student->punoIme()); ?></div>
-          <div class="user-sub">
-            <?php echo htmlspecialchars(trim($student->ustanova . ' · ' . $student->broj_indeksa, ' ·')); ?>
-          </div>
-        </div>
-      </div>
+      <?php $imaObavestenja = !empty($poruke); require __DIR__ . '/delovi/korisnik.php'; ?>
     </header>
 
     <!-- RED 1: kartica sa stanjem + tri male kartice -->
