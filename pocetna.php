@@ -1,6 +1,6 @@
 <?php
 /**
- * LOGIKA: početna strana studenta (backend – Luka).
+ * LOGIKA: početna strana studenta.
  * Izgled je u views/pocetna.view.php.
  *
  * Prikaz dobija:

@@ -1,10 +1,10 @@
 <?php
 /**
- * LOGIKA: administratorski pregled (backend – Luka).
+ * LOGIKA: administratorski pregled.
  * Izgled je u views/admin_pocetna.view.php.
  *
  * Za sada samo pozdrav i meni; statistika (uplate danas, prodati obroci,
- * izdati obroci po menzama, poslednje uplate) dolazi u nedelji 6 po planu.
+ * izdati obroci po menzama, poslednje uplate) se dodaje u sledećoj fazi.
  *
  * Prikaz dobija:
  *   $admin   Admin   ime_prezime, inicijali(), nazivUloge()

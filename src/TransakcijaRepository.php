@@ -5,7 +5,7 @@ require_once __DIR__ . '/Transakcija.php';
 
 /**
  * Evidencija novca. Sama transakcija NE menja stanje kartice –
- * to radi uplata/kupovina (N5) u jednoj transakciji baze zajedno sa ovim zapisom.
+ * to radi uplata/kupovina u jednoj transakciji baze zajedno sa ovim zapisom.
  */
 class TransakcijaRepository extends BaseRepository
 {

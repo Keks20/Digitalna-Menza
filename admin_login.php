@@ -1,6 +1,6 @@
 <?php
 /**
- * LOGIKA: prijava zaposlenih SC-a – administrator i kasir (backend – Luka).
+ * LOGIKA: prijava zaposlenih SC-a – administrator i kasir.
  * Izgled je u views/admin_login.view.php.
  *
  * Posle prijave: administrator ide na admin_pocetna.php, kasir na kasir_bonovi.php.

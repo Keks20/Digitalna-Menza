@@ -8,7 +8,6 @@ require_once __DIR__ . '/Database.php';
  *
  * Implementira CrudInterface i nudi zajedničku funkcionalnost
  * (mysqli konekcija, generički read() i delete()) koju sve naslednice dele.
- * Ovo demonstrira nasleđivanje (extends) uz implementaciju interfejsa.
  */
 abstract class BaseRepository implements CrudInterface
 {

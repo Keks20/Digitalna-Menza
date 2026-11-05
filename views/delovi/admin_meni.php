@@ -7,7 +7,8 @@
  * Koristi i $admin (iz includes/provera_admina.php) da kasiru prikaže samo njegove stavke.
  *
  * Stavka je link tek kad njena stranica postoji.
- * PRIVREMENI IZGLED – kolega ga menja po Figmi; niz $stavkeMenija ostaje.
+ * Privremeni izgled – po Figmi ide bočni meni na računaru i donja traka na telefonu;
+ * niz $stavkeMenija ostaje isti.
  */
 $aktivnaStrana = $aktivnaStrana ?? '';
 

@@ -1,10 +1,10 @@
 <?php
 /**
- * LOGIKA: provera QR bonova na kasi (backend – Luka).
+ * LOGIKA: provera QR bonova na kasi.
  * Izgled je u views/kasir_bonovi.view.php.
  *
  * Na stranicu smeju kasir i administrator.
- * Skeniranje QR bona i izdavanje obroka dolaze u nedelji 6 po planu – za sada samo pozdrav.
+ * Za sada samo pozdrav; skeniranje QR bona i izdavanje obroka se dodaju u sledećoj fazi.
  *
  * Prikaz dobija:
  *   $admin   Admin   ime_prezime, inicijali(), nazivUloge()

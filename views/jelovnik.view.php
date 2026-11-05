@@ -3,7 +3,7 @@
  * PRIKAZ: dnevni i nedeljni jelovnik (izgled po Figmi – ekran "Jelovnik").
  *
  * Spisak promenljivih koje stižu iz jelovnik.php je na vrhu tog fajla.
- * Ovde nema upita u bazu – samo prikaz. Tekst iz baze uvek kroz htmlspecialchars().
+ * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
  */
 $naslovStrane = 'Jelovnik';
 $aktivnaStrana = 'jelovnik.php';
@@ -93,7 +93,7 @@ $izgledObroka = [
                   <h2 class="meal-name"><?php echo htmlspecialchars($tip->naziv); ?></h2>
                   <p class="meal-hours"><?php echo $tip->radnoVreme(); ?></p>
                 </div>
-                <span class="meal-price"><?php echo number_format($tip->cena, 0, ',', '.'); ?> RSD</span>
+                <span class="meal-price"><?php echo Format::cena($tip->cena); ?></span>
               </div>
 
               <ul class="dish-list">

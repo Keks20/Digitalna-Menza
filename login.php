@@ -1,6 +1,6 @@
 <?php
 /**
- * LOGIKA: prijava studenta brojem kartice i lozinkom (backend – Luka).
+ * LOGIKA: prijava studenta brojem kartice i lozinkom.
  * Izgled je u views/login.view.php.
  *
  * Prikaz dobija:
