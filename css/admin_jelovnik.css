@@ -4,17 +4,6 @@
    za menze .btn-choice i za dane .day-btn).
    ========================================================= */
 
-/* Admin stranice su šire (dve kolone) */
-.app-main-wide {
-  max-width: 1320px;
-}
-
-.panel-title {
-  margin: 0 0 16px;
-  font-size: 16px;
-  font-weight: 700;
-}
-
 /* Nedelja sa strelicama, desno od menzi */
 .week-switch {
   color: var(--muted);
@@ -83,26 +72,6 @@
   margin-top: 10px;
 }
 
-/* Polje za unos u aplikaciji (isti izgled kao na prijavi) */
-.app-input {
-  height: 46px;
-  padding: 0 14px;
-  background-color: #fff;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 15px;
-  color: var(--text);
-}
-
-.app-input::placeholder {
-  color: #9aa1b1;
-}
-
-.app-input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(30, 95, 192, 0.15);
-}
-
 .posno-check {
   flex-shrink: 0;
   padding-left: 23px;
@@ -110,52 +79,6 @@
 
 .posno-check .form-check-label {
   font-size: 14px;
-}
-
-/* ---------- Dugmad ---------- */
-.btn-app {
-  --bs-btn-bg: var(--blue);
-  --bs-btn-border-color: var(--blue);
-  --bs-btn-hover-bg: var(--blue-hover);
-  --bs-btn-hover-border-color: var(--blue-hover);
-  --bs-btn-active-bg: var(--blue-hover);
-  --bs-btn-active-border-color: var(--blue-hover);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 20px;
-  border-radius: 9px;
-  font-size: 15px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.btn-app .ikonica {
-  width: 17px;
-  height: 17px;
-}
-
-.btn-app-outline {
-  --bs-btn-bg: #fff;
-  --bs-btn-color: var(--text);
-  --bs-btn-border-color: #dfe3eb;
-  --bs-btn-hover-bg: #fff;
-  --bs-btn-hover-color: var(--text);
-  --bs-btn-hover-border-color: #b9c6dd;
-  --bs-btn-active-bg: #f3f5f8;
-  --bs-btn-active-color: var(--text);
-  --bs-btn-active-border-color: #b9c6dd;
-}
-
-/* ---------- Cene (desno) ---------- */
-.panel .field {
-  margin-bottom: 16px;
-}
-
-.panel .field .form-control {
-  padding-right: 14px;
 }
 
 /* ---------- Status nedelje ---------- */

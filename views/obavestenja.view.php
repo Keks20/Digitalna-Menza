@@ -1,43 +1,52 @@
 <?php
 /**
- * PRIKAZ: sva obaveštenja za studenta.
+ * PRIKAZ: sva obaveštenja za studenta ("Sve poruke" sa početne).
  *
- * Privremeni raspored – u Figmi nema posebnog ekrana; izgled kartica može da prati
- * blok "Poruke studentima" sa početne.
+ * U Figmi nema posebnog ekrana – kartice prate blok "Poruke studentima" sa početne.
  * Spisak promenljivih je na vrhu obavestenja.php.
  * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
  */
 $naslovStrane = 'Obaveštenja';
-$klasaTela = 'bg-light';
 $aktivnaStrana = 'obavestenja.php';
 require __DIR__ . '/delovi/zaglavlje.php';
 require __DIR__ . '/delovi/meni.php';
+require_once __DIR__ . '/delovi/obavestenja_izgled.php';
 ?>
-  <main class="container py-4" style="max-width: 900px;">
-    <h1 class="h3 mb-1">Obaveštenja</h1>
-    <p class="text-muted">Poruke Studentskog centra, menzi i tvog doma</p>
+  <main class="app-main">
 
-    <?php if (empty($poruke)): ?>
-      <div class="alert alert-secondary">Trenutno nema obaveštenja.</div>
-    <?php endif; ?>
-
-    <?php foreach ($poruke as $poruka): ?>
-      <div class="card mb-2">
-        <div class="card-body">
-          <p class="small text-muted mb-1">
-            <?php echo Format::datumVreme($poruka['kreirano']); ?> ·
-            <?php if ($poruka['ciljna_grupa'] === 'menza'): ?>
-              <?php echo htmlspecialchars($poruka['menza'] ?? 'Menza'); ?>
-            <?php elseif ($poruka['ciljna_grupa'] === 'dom'): ?>
-              <?php echo htmlspecialchars($poruka['dom']); ?>
-            <?php else: ?>
-              Svi studenti
-            <?php endif; ?>
-          </p>
-          <p class="fw-semibold mb-1"><?php echo htmlspecialchars($poruka['naslov']); ?></p>
-          <p class="mb-0"><?php echo nl2br(htmlspecialchars($poruka['tekst'])); ?></p>
-        </div>
+    <header class="page-header d-flex justify-content-between align-items-start gap-3">
+      <div>
+        <h1 class="page-title">Obaveštenja</h1>
+        <p class="page-date">Poruke Studentskog centra, menzi i tvog doma</p>
       </div>
-    <?php endforeach; ?>
+      <?php $imaObavestenja = false; require __DIR__ . '/delovi/korisnik.php'; ?>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Sve poruke</h2>
+        <a href="pocetna.php" class="panel-link"><?php echo ikonica('levo'); ?> Početna</a>
+      </div>
+
+      <?php foreach ($poruke as $poruka): ?>
+        <?php $izgled = izgledObavestenja($poruka); ?>
+        <article class="message d-flex">
+          <span class="tint-box <?php echo $izgled['boja']; ?>"><?php echo ikonica($izgled['ikonica']); ?></span>
+          <div>
+            <h3 class="message-title"><?php echo htmlspecialchars($poruka['naslov']); ?></h3>
+            <p class="message-text"><?php echo nl2br(htmlspecialchars($poruka['tekst'])); ?></p>
+            <p class="message-meta">
+              <?php echo Format::datumVreme($poruka['kreirano']); ?> ·
+              <?php echo htmlspecialchars($izgled['kome']); ?>
+            </p>
+          </div>
+        </article>
+      <?php endforeach; ?>
+
+      <?php if (empty($poruke)): ?>
+        <p class="message-text mb-0">Trenutno nema obaveštenja.</p>
+      <?php endif; ?>
+    </section>
+
   </main>
 <?php require __DIR__ . '/delovi/podnozje.php'; ?>

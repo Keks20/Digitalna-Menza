@@ -4,10 +4,6 @@
    Učitava se posle style.css.
    ========================================================= */
 
-.app-main-wide {
-  max-width: 1320px;
-}
-
 /* ---------- Pregled ---------- */
 .welcome-panel {
   padding: 22px;
