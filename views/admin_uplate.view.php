@@ -2,7 +2,7 @@
 /**
  * PRIKAZ: uplate i obaveštenja (izgled po Figmi – ekran "Admin-uplate").
  *
- * Levo: uplate studenata – backend ih dodaje uz dopunu kartice, do tada okvir sa oznakom "Uskoro".
+ * Levo: uplate studenata – filter po statusu, pretraga i potvrda IPS uplata koje čekaju.
  * Desno: novo obaveštenje / izmena i lista objavljenih.
  * Spisak promenljivih i imena polja forme su na vrhu admin_uplate.php.
  * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
@@ -15,6 +15,19 @@ require __DIR__ . '/delovi/admin_meni.php';
 require_once __DIR__ . '/delovi/obavestenja_izgled.php';
 
 $izmena = $forma['id'] !== null;
+
+// Boja oznake za status uplate
+$BOJE_STATUSA = [
+    'uspesno' => 'tag-green',
+    'ceka_potvrdu' => 'tag-orange',
+    'odbijeno' => 'tag-red',
+];
+
+// Kratak naziv načina plaćanja za usku kolonu
+$KRATAK_NACIN = [
+    'platna_kartica' => 'Kartica',
+    'ips_qr' => 'IPS QR',
+];
 ?>
   <main class="app-main app-main-wide">
 
@@ -153,21 +166,105 @@ $izmena = $forma['id'] !== null;
         <section class="panel">
           <div class="panel-head">
             <h2>Uplate studenata</h2>
-            <span class="tag tag-gray">Uskoro</span>
+            <?php if ($brojNaCekanju > 0): ?>
+              <span class="tag tag-orange"><?php echo $brojNaCekanju; ?> čeka potvrdu</span>
+            <?php endif; ?>
           </div>
 
-          <div class="payments-head d-none d-md-grid" aria-hidden="true">
-            <span>Vreme</span><span>Student</span><span>Način</span><span class="text-end">Iznos</span><span>Status</span>
+          <!-- Filter po statusu i pretraga -->
+          <div class="payments-tools d-flex flex-wrap align-items-center gap-2 mb-3">
+            <nav class="d-flex flex-wrap gap-2" aria-label="Filter uplata po statusu">
+              <?php foreach ($FILTERI as $vrednost => $naziv): ?>
+                <?php $aktivan = $filterStatus === $vrednost; ?>
+                <a href="<?php echo htmlspecialchars(adminUplateUrl($vrednost, $pretraga)); ?>"
+                   class="btn-choice btn-choice-sm<?php echo $aktivan ? ' active' : ''; ?>"<?php echo $aktivan ? ' aria-current="page"' : ''; ?>>
+                  <?php echo $naziv; ?>
+                  <?php if ($vrednost === 'ceka_potvrdu' && $brojNaCekanju > 0): ?>
+                    <span class="choice-count"><?php echo $brojNaCekanju; ?></span>
+                  <?php endif; ?>
+                </a>
+              <?php endforeach; ?>
+            </nav>
+            <form method="get" action="admin_uplate.php" class="payments-search ms-lg-auto" role="search">
+              <?php if ($filterStatus !== ''): ?>
+                <input type="hidden" name="status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
+              <?php endif; ?>
+              <?php echo ikonica('pretraga', 'search-icon'); ?>
+              <input type="search" class="form-control app-input" name="q" value="<?php echo htmlspecialchars($pretraga); ?>"
+                     placeholder="Ime, kartica ili broj transakcije" aria-label="Pretraga uplata" />
+            </form>
           </div>
 
-          <div class="empty-state text-center">
-            <span class="tint-box tint-green mx-auto"><?php echo ikonica('novac'); ?></span>
-            <p class="empty-title">Pregled uplata stiže uz dopunu kartice</p>
-            <p class="empty-text">
-              Ovde će biti današnje uplate studenata, pretraga po imenu ili broju kartice
-              i potvrda IPS uplata koje čekaju.
-            </p>
-          </div>
+          <?php if (empty($uplate)): ?>
+            <div class="empty-state text-center">
+              <span class="tint-box tint-green mx-auto"><?php echo ikonica('novac'); ?></span>
+              <?php if ($filterStatus === '' && $pretraga === ''): ?>
+                <p class="empty-title">Još nema uplata</p>
+                <p class="empty-text">Uplate se pojavljuju ovde čim student dopuni karticu.</p>
+              <?php else: ?>
+                <p class="empty-title">Nema uplata za izabrani filter</p>
+                <p class="empty-text">Probaj drugi status ili obriši tekst iz pretrage.</p>
+              <?php endif; ?>
+            </div>
+          <?php else: ?>
+            <div class="payments-head d-none d-md-grid" aria-hidden="true">
+              <span>Vreme</span><span>Student</span><span>Način</span><span class="text-end">Iznos</span><span>Status</span>
+            </div>
+
+            <?php foreach ($uplate as $u): ?>
+              <?php
+                $kada = strtotime($u['kreirano']);
+                $bojaStatusa = $BOJE_STATUSA[$u['status']] ?? 'tag-gray';
+              ?>
+              <article class="payment-row<?php echo $u['status'] === 'ceka_potvrdu' ? ' is-pending' : ''; ?>"
+                       title="<?php echo Format::brojTransakcije((int)$u['id'], $u['kreirano']); ?>">
+                <div class="pay-time">
+                  <span class="pay-clock"><?php echo date('H:i', $kada); ?></span>
+                  <?php if (date('Y-m-d', $kada) !== date('Y-m-d')): ?>
+                    <span class="pay-date"><?php echo date('d.m.', $kada); ?></span>
+                  <?php endif; ?>
+                  <span class="d-md-none"> · <?php echo $KRATAK_NACIN[$u['nacin']] ?? Format::nacinPlacanja($u['nacin']); ?></span>
+                </div>
+                <div class="pay-student min-w-0">
+                  <p class="pay-name"><?php echo htmlspecialchars($u['ime'] . ' ' . $u['prezime']); ?></p>
+                  <p class="pay-sub"><?php echo htmlspecialchars(Format::brojKartice($u['broj_kartice'])); ?></p>
+                </div>
+                <div class="pay-method d-none d-md-block"><?php echo $KRATAK_NACIN[$u['nacin']] ?? Format::nacinPlacanja($u['nacin']); ?></div>
+                <div class="pay-amount"><?php echo Format::novac($u['iznos']); ?></div>
+                <div class="pay-status"><span class="tag ms-0 <?php echo $bojaStatusa; ?>"><?php echo Format::statusTransakcije($u['status']); ?></span></div>
+
+                <?php if ($u['status'] === 'ceka_potvrdu'): ?>
+                  <!-- IPS uplata čeka: admin potvrđuje kad novac stigne na račun -->
+                  <div class="pay-actions d-flex flex-wrap align-items-center gap-2">
+                    <span class="pay-tx"><?php echo Format::brojTransakcije((int)$u['id'], $u['kreirano']); ?></span>
+                    <form method="post" action="admin_uplate.php">
+                      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+                      <input type="hidden" name="akcija" value="potvrdi" />
+                      <input type="hidden" name="id" value="<?php echo (int)$u['id']; ?>" />
+                      <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
+                      <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($pretraga); ?>" />
+                      <button type="submit" class="btn-pay btn-pay-ok"><?php echo ikonica('kvacica'); ?> Potvrdi uplatu</button>
+                    </form>
+                    <form method="post" action="admin_uplate.php" onsubmit="return confirm('Odbiti ovu uplatu? Novac neće biti dodat na karticu.');">
+                      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+                      <input type="hidden" name="akcija" value="odbij" />
+                      <input type="hidden" name="id" value="<?php echo (int)$u['id']; ?>" />
+                      <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
+                      <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($pretraga); ?>" />
+                      <button type="submit" class="btn-pay btn-pay-no">Odbij</button>
+                    </form>
+                  </div>
+                <?php endif; ?>
+              </article>
+            <?php endforeach; ?>
+          <?php endif; ?>
+
+          <p class="payments-foot">
+            <?php if (count($uplate) >= BROJ_UPLATA): ?>
+              Prikazano je poslednjih <?php echo BROJ_UPLATA; ?> uplata – za starije koristi pretragu.<br />
+            <?php endif; ?>
+            Danas: <strong><?php echo $uplateDanas['broj']; ?> uspešnih uplata</strong> · <?php echo Format::novac($uplateDanas['zbir']); ?>
+          </p>
         </section>
       </div>
     </div>

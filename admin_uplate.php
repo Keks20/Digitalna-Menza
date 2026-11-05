@@ -48,7 +48,7 @@ require_once __DIR__ . '/src/Poruka.php';
 const MAKS_NASLOV = 150;    // kolona obavestenja.naslov je VARCHAR(150)
 const MAKS_TEKST = 2000;
 const BROJ_U_LISTI = 20;
-const BROJ_UPLATA = 50;
+const BROJ_UPLATA = 20;
 
 $FILTERI = [
     '' => 'Sve',

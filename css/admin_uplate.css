@@ -119,3 +119,205 @@ select.app-input {
   font-size: 13.5px;
   font-weight: 600;
 }
+
+/* Filter po statusu: manja .btn-choice dugmad */
+.btn-choice-sm {
+  height: 38px;
+  padding: 0 14px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.choice-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #fdf0e1;
+  color: #d9731c;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* Pretraga sa ikonicom u polju */
+.payments-search {
+  position: relative;
+  flex: 1 1 220px;
+  max-width: 300px;
+}
+
+.payments-search .app-input {
+  height: 38px;
+  padding-left: 38px;
+  font-size: 14px;
+}
+
+.payments-search .search-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: #9aa1b1;
+  pointer-events: none;
+}
+
+/* Jedna uplata: na telefonu dva reda, na računaru iste kolone kao zaglavlje tabele */
+.payment-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "student amount"
+    "time    status"
+    "actions actions";
+  gap: 4px 12px;
+  align-items: center;
+  padding: 14px 4px;
+  border-top: 1px solid #eceff4;
+  font-size: 14px;
+}
+
+.payments-head + .payment-row {
+  border-top: 0;
+}
+
+.pay-time    { grid-area: time; color: var(--muted); font-size: 13px; }
+.pay-student { grid-area: student; }
+.pay-method  { grid-area: method; color: var(--muted); }
+.pay-amount  { grid-area: amount; font-weight: 700; white-space: nowrap; text-align: right; }
+.pay-status  { grid-area: status; text-align: right; }
+.pay-actions { grid-area: actions; margin-top: 6px; }
+
+.pay-clock {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.pay-date {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.pay-name {
+  margin: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pay-tx {
+  flex-basis: 100%;
+  color: #7c8496;
+  font-size: 12.5px;
+}
+
+.pay-sub {
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #7c8496;
+  font-size: 12.5px;
+}
+
+.payment-row.is-pending {
+  margin: 0 -12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 12px;
+  border-top-color: transparent;
+  background: #fffaf3;
+}
+
+@media (min-width: 768px) {
+  /* Kolone uplata su uže od prvobitnih (64px 1.6fr 1fr 90px 110px) da iznos i status stanu u jedan red */
+  .payments-head,
+  .payment-row {
+    grid-template-columns: 46px minmax(0, 1fr) 58px 100px 100px;
+    column-gap: 12px;
+  }
+
+  .payment-row {
+    grid-template-areas:
+      "time student method amount status"
+      ".    actions actions actions actions";
+    row-gap: 4px;
+    padding: 14px 16px;
+  }
+
+  .pay-status {
+    text-align: left;
+  }
+
+  .pay-date {
+    display: block;
+    margin-left: 0;
+  }
+
+  .pay-tx {
+    flex-basis: auto;
+    margin-right: auto;
+  }
+
+  .payment-row.is-pending {
+    margin: 0;
+  }
+}
+
+/* Potvrdi / Odbij kod uplate koja čeka */
+.btn-pay {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.btn-pay .ikonica {
+  width: 15px;
+  height: 15px;
+}
+
+.btn-pay-ok {
+  background: #2f9e5b;
+  color: #fff;
+}
+
+.btn-pay-ok:hover {
+  background: #23884c;
+}
+
+.btn-pay-no {
+  background: #fff;
+  border-color: #f2c4c4;
+  color: #c62828;
+}
+
+.btn-pay-no:hover {
+  background: #fde8e8;
+}
+
+.btn-pay:focus-visible {
+  outline: 3px solid rgba(30, 95, 192, 0.3);
+  outline-offset: 2px;
+}
+
+.payments-foot {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #eceff4;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.payments-foot strong {
+  color: var(--text);
+}
