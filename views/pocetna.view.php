@@ -10,6 +10,7 @@ $aktivnaStrana = 'pocetna.php';
 $stilovi = ['css/pocetna.css'];
 require __DIR__ . '/delovi/zaglavlje.php';
 require __DIR__ . '/delovi/meni.php';
+require_once __DIR__ . '/delovi/obavestenja_izgled.php';
 
 /** Link ka stranici ako već postoji, inače '#' (da dugme ne vodi na grešku 404). */
 function linkKa(string $fajl): string
@@ -205,21 +206,19 @@ $izgledObroka = [
     <section class="panel">
       <div class="panel-head">
         <h2>Poruke studentima</h2>
-        <a href="#" class="panel-link">Sve poruke <?php echo ikonica('desno'); ?></a>
+        <a href="<?php echo linkKa('obavestenja.php'); ?>" class="panel-link">Sve poruke <?php echo ikonica('desno'); ?></a>
       </div>
 
       <?php foreach ($poruke as $poruka): ?>
-        <?php $zaMenzu = !empty($poruka['menza_id']); ?>
+        <?php $izgled = izgledObavestenja($poruka); ?>
         <article class="message d-flex">
-          <span class="tint-box <?php echo $zaMenzu ? 'tint-orange' : 'tint-blue'; ?>">
-            <?php echo ikonica($zaMenzu ? 'upozorenje' : 'megafon'); ?>
-          </span>
+          <span class="tint-box <?php echo $izgled['boja']; ?>"><?php echo ikonica($izgled['ikonica']); ?></span>
           <div>
             <h3 class="message-title"><?php echo htmlspecialchars($poruka['naslov']); ?></h3>
             <p class="message-text"><?php echo htmlspecialchars($poruka['tekst']); ?></p>
             <p class="message-meta">
               <?php echo Format::datum($poruka['kreirano']); ?> ·
-              <?php echo htmlspecialchars($poruka['menza'] ?? 'Studentski centar Kragujevac'); ?>
+              <?php echo htmlspecialchars($izgled['kome']); ?>
             </p>
           </div>
         </article>
