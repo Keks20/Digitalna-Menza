@@ -6,6 +6,7 @@
 class Format
 {
     private const DANI = ['Nedelja', 'Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota'];
+    private const DANI_KRATKO = ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'];
     private const MESECI = [
         1 => 'januar', 'februar', 'mart', 'april', 'maj', 'jun',
         'jul', 'avgust', 'septembar', 'oktobar', 'novembar', 'decembar',
@@ -54,5 +55,32 @@ class Format
     public static function vreme(string $vreme): string
     {
         return substr($vreme, 0, 5);
+    }
+
+    /** "2026-11-05" -> "Čet" (za dugmad sa danima u nedelji) */
+    public static function danKratko(string $datum): string
+    {
+        return self::DANI_KRATKO[(int)date('w', strtotime($datum))];
+    }
+
+    /**
+     * Opis nedelje od ponedeljka do nedelje:
+     *   "2026-11-02" -> "2–8. novembar 2026."
+     *   "2026-10-26" -> "26. oktobar – 1. novembar 2026."
+     */
+    public static function nedelja(string $ponedeljak): string
+    {
+        $od = strtotime($ponedeljak);
+        $do = strtotime($ponedeljak . ' +6 days');
+        $godina = date('Y', $do) . '.';
+
+        if (date('n', $od) === date('n', $do)) {
+            return date('j', $od) . '–' . date('j', $do) . '. ' . self::MESECI[(int)date('n', $do)] . ' ' . $godina;
+        }
+        $pocetak = date('j', $od) . '. ' . self::MESECI[(int)date('n', $od)];
+        if (date('Y', $od) !== date('Y', $do)) {
+            $pocetak .= ' ' . date('Y', $od) . '.';
+        }
+        return $pocetak . ' – ' . date('j', $do) . '. ' . self::MESECI[(int)date('n', $do)] . ' ' . $godina;
     }
 }
