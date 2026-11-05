@@ -34,6 +34,9 @@ Tehnologije: PHP 8 (OOP), MySQL/MariaDB (mysqli, prepared statements), Bootstrap
 | Admin | `admin` | `admin123` |
 | Kasir | `kasir` | `kasir123` |
 
+Studenti se prijavljuju na `http://localhost/menza/`, a zaposleni (admin i kasir) na
+`http://localhost/menza/admin_login.php`.
+
 Test podaci se računaju od dana uvoza (jelovnik za ovu i sledeću nedelju, obroci i stanarina
 za tekući mesec). Pred odbranu je dovoljno ponovo uvesti `schema.sql` pa `seed.sql`.
 
@@ -47,13 +50,17 @@ index.php                preusmerava na prijavu ili početnu
 login.php / logout.php   prijava brojem kartice i odjava
 pocetna.php              LOGIKA početne: upiti u bazu, promenljive za prikaz
 jelovnik.php             LOGIKA jelovnika: izbor menze i dana (?menza=1&dan=2026-11-05)
+admin_login.php          prijava zaposlenih (admin i kasir), admin_logout.php – odjava
+admin_pocetna.php        administratorski pregled (samo admin)
+kasir_bonovi.php         provera QR bonova (kasir i admin)
 views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)
   login.view.php
   pocetna.view.php
   jelovnik.view.php
-  delovi/                zajednički delovi: zaglavlje.php (<head>), meni.php, podnozje.php
-includes/                provera_prijave.php – zaštita stranica za prijavljene
-src/                     klase: Database, CrudInterface, BaseRepository, Auth, modeli i repozitorijumi
+  admin_login.view.php, admin_pocetna.view.php, kasir_bonovi.view.php
+  delovi/                zajednički delovi: zaglavlje.php (<head>), meni.php, admin_meni.php, podnozje.php
+includes/                provera_prijave.php (student) i provera_admina.php (zaposleni, po ulozi)
+src/                     klase: Database, CrudInterface, BaseRepository, BaseAuth (Auth, AdminAuth), modeli i repozitorijumi
 db/                      schema.sql (struktura) i seed.sql (test podaci)
 css/, js/                stilovi i JavaScript
 config.php               podešavanja baze (config.sample.php / config.local.php)

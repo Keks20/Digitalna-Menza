@@ -1,25 +1,13 @@
 <?php
 
-require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/BaseAuth.php';
 
 /**
- * Prijava studenta brojem studentske kartice i lozinkom, sesija i CSRF zaštita.
+ * Prijava studenta brojem studentske kartice i lozinkom.
+ * Sesija i CSRF zaštita su nasleđeni iz BaseAuth.
  */
-class Auth
+class Auth extends BaseAuth
 {
-    private $conn;
-
-    /** @var string Poruka o grešci posle neuspešne prijave */
-    private $greska = '';
-
-    public function __construct()
-    {
-        $this->conn = Database::getInstance();
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
-
     public function login(string $brojKartice, string $lozinka): bool
     {
         // Prihvatamo i "0012 3456 7890" i "001234567890"
@@ -57,15 +45,13 @@ class Auth
         return true;
     }
 
-    public function getGreska(): string
-    {
-        return $this->greska;
-    }
-
+    /**
+     * Odjavljuje samo studenta – ako je u istom pregledaču prijavljen i zaposleni SC-a, on ostaje.
+     */
     public function logout(): void
     {
-        session_unset();
-        session_destroy();
+        unset($_SESSION['student_id'], $_SESSION['kartica_id'], $_SESSION['ime'], $_SESSION['prezime']);
+        session_regenerate_id(true);
     }
 
     public function check(): bool
@@ -81,18 +67,5 @@ class Auth
     public function karticaId(): ?int
     {
         return $this->check() ? (int)$_SESSION['kartica_id'] : null;
-    }
-
-    public function generateCsrfToken(): string
-    {
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-        return $_SESSION['csrf_token'];
-    }
-
-    public function validateCsrfToken(string $token): bool
-    {
-        return !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
     }
 }
