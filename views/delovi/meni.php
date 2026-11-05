@@ -8,7 +8,8 @@
  * Stavka se prikazuje kao link tek kad njena stranica postoji, pa meni
  * nikad ne vodi na stranicu koja još nije napravljena.
  *
- * PRIVREMENI IZGLED – kolega ga menja po Figmi; niz $stavkeMenija ostaje.
+ * Privremeni izgled – po Figmi ide bočni meni na računaru i donja traka na telefonu;
+ * niz $stavkeMenija ostaje isti.
  */
 $aktivnaStrana = $aktivnaStrana ?? '';
 

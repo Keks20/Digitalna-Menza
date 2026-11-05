@@ -185,7 +185,7 @@ CREATE TABLE obavestenja (
   CONSTRAINT fk_obavestenja_admin FOREIGN KEY (admin_id) REFERENCES admini(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- ---------- Mini kviz (pitanja se ubacuju u N5) ----------
+-- ---------- Mini kviz ----------
 
 CREATE TABLE kviz_pitanja (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

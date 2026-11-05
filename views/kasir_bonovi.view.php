@@ -2,7 +2,7 @@
 /**
  * PRIKAZ: provera QR bonova na kasi.
  *
- * PRIVREMENI IZGLED (Luka) – skeniranje bona iz Figme (ekran "Kasir-provera-bonova") dolazi u nedelji 6.
+ * Privremeni raspored – konačni izgled sa skeniranjem bona je ekran "Kasir-provera-bonova" u Figmi.
  * Spisak promenljivih je na vrhu kasir_bonovi.php.
  */
 $naslovStrane = 'Provera bonova';

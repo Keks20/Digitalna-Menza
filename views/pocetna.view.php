@@ -2,9 +2,9 @@
 /**
  * PRIKAZ: početna strana studenta.
  *
- * PRIVREMENI IZGLED (Luka) – kolega ga menja dizajnom iz Figme (ekran "Pocetna").
+ * Privremeni raspored – konačni izgled je ekran "Pocetna" u Figmi.
  * Spisak promenljivih koje stižu iz pocetna.php je na vrhu tog fajla.
- * Ovde nema upita u bazu – samo prikaz. Tekst iz baze uvek kroz htmlspecialchars().
+ * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
  */
 $naslovStrane = 'Početna';
 $klasaTela = 'bg-light';

@@ -2,9 +2,9 @@
 /**
  * PRIKAZ: dnevni i nedeljni jelovnik.
  *
- * PRIVREMENI IZGLED (Luka) – kolega ga menja dizajnom iz Figme (ekran "Jelovnik").
+ * Privremeni raspored – konačni izgled je ekran "Jelovnik" u Figmi.
  * Spisak promenljivih koje stižu iz jelovnik.php je na vrhu tog fajla.
- * Ovde nema upita u bazu – samo prikaz. Tekst iz baze uvek kroz htmlspecialchars().
+ * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
  */
 $naslovStrane = 'Jelovnik';
 $klasaTela = 'bg-light';
@@ -70,7 +70,7 @@ require __DIR__ . '/delovi/meni.php';
                     <p class="fw-bold mb-0"><?php echo htmlspecialchars($tip->naziv); ?></p>
                     <p class="text-muted small mb-0"><?php echo $tip->radnoVreme(); ?></p>
                   </div>
-                  <span class="fw-bold"><?php echo number_format($tip->cena, 0, ',', '.'); ?> RSD</span>
+                  <span class="fw-bold"><?php echo Format::cena($tip->cena); ?></span>
                 </div>
                 <ul class="list-group list-group-flush">
                   <?php foreach ($jelovnik[$tip->id] ?? [] as $stavka): ?>

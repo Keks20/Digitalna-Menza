@@ -38,7 +38,7 @@ class AdminRepository extends BaseRepository
     }
 
     /**
-     * Menjaju se ime i uloga (lozinka ima posebnu proveru stare lozinke – kasnije, na profilu).
+     * Menjaju se ime i uloga (lozinka se menja posebno, uz proveru stare lozinke).
      */
     public function update(int $id, array $data)
     {
