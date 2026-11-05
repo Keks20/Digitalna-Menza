@@ -1,6 +1,6 @@
 <?php
 /**
- * PRIKAZ: uplate i obaveštenja (za sada deo sa obaveštenjima).
+ * PRIKAZ: uplate studenata i obaveštenja.
  *
  * Privremeni raspored – konačni izgled je ekran "Admin-uplate" u Figmi
  * (levo tabela uplata, desno "Novo obaveštenje" i "Objavljeno").
@@ -14,11 +14,18 @@ require __DIR__ . '/delovi/zaglavlje.php';
 require __DIR__ . '/delovi/admin_meni.php';
 
 $izmena = $forma['id'] !== null;
+
+// Boje znački za status uplate
+$bojeStatusa = [
+    'uspesno' => 'text-bg-success',
+    'ceka_potvrdu' => 'text-bg-warning',
+    'odbijeno' => 'text-bg-danger',
+];
 ?>
   <main class="container pb-4" style="max-width: 1100px;">
 
     <h1 class="h3 mb-1">Uplate i obaveštenja</h1>
-    <p class="text-muted">Poruke za studente u aplikaciji</p>
+    <p class="text-muted">Pregled uplata studenata i poruke za aplikaciju</p>
 
     <?php if ($poruka): ?>
       <div class="alert alert-<?php echo $poruka['tip'] === 'success' ? 'success' : 'danger'; ?>" role="alert">
@@ -32,6 +39,81 @@ $izmena = $forma['id'] !== null;
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
+
+    <!-- Uplate studenata -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+          <div class="d-flex flex-wrap gap-2">
+            <?php foreach ($FILTERI as $vrednost => $naziv): ?>
+              <a href="<?php echo htmlspecialchars(adminUplateUrl($vrednost, $pretraga)); ?>"
+                 class="btn btn-sm <?php echo $filterStatus === $vrednost ? 'btn-primary' : 'btn-outline-secondary'; ?>">
+                <?php echo $naziv; ?>
+                <?php if ($vrednost === 'ceka_potvrdu' && $brojNaCekanju > 0): ?>
+                  <span class="badge text-bg-warning"><?php echo $brojNaCekanju; ?></span>
+                <?php endif; ?>
+              </a>
+            <?php endforeach; ?>
+          </div>
+          <form method="get" action="admin_uplate.php" class="d-flex gap-2">
+            <?php if ($filterStatus !== ''): ?><input type="hidden" name="status" value="<?php echo htmlspecialchars($filterStatus); ?>" /><?php endif; ?>
+            <input type="search" class="form-control form-control-sm" name="q" value="<?php echo htmlspecialchars($pretraga); ?>"
+                   placeholder="ime, broj kartice ili transakcije" style="min-width: 240px;" />
+            <button type="submit" class="btn btn-sm btn-outline-primary">Traži</button>
+          </form>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-2">
+            <thead>
+              <tr>
+                <th>Vreme</th><th>Student</th><th>Način</th><th class="text-end">Iznos</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($uplate as $u): ?>
+                <tr>
+                  <td class="text-nowrap small"><?php echo Format::datumVreme($u['kreirano']); ?><br /><span class="text-muted">br. <?php echo (int)$u['id']; ?></span></td>
+                  <td>
+                    <?php echo htmlspecialchars($u['ime'] . ' ' . $u['prezime']); ?><br />
+                    <span class="small text-muted"><?php echo Format::brojKartice($u['broj_kartice']); ?></span>
+                  </td>
+                  <td class="small"><?php echo Format::nacinPlacanja($u['nacin']); ?></td>
+                  <td class="text-end text-nowrap"><?php echo Format::novac($u['iznos']); ?></td>
+                  <td><span class="badge <?php echo $bojeStatusa[$u['status']]; ?>"><?php echo Format::statusTransakcije($u['status']); ?></span></td>
+                  <td class="text-end text-nowrap">
+                    <?php if ($u['status'] === 'ceka_potvrdu'): ?>
+                      <form method="post" action="admin_uplate.php" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+                        <input type="hidden" name="akcija" value="potvrdi" />
+                        <input type="hidden" name="id" value="<?php echo (int)$u['id']; ?>" />
+                        <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
+                        <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($pretraga); ?>" />
+                        <button type="submit" class="btn btn-sm btn-success">Potvrdi</button>
+                      </form>
+                      <form method="post" action="admin_uplate.php" class="d-inline" onsubmit="return confirm('Odbiti ovu uplatu?');">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+                        <input type="hidden" name="akcija" value="odbij" />
+                        <input type="hidden" name="id" value="<?php echo (int)$u['id']; ?>" />
+                        <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
+                        <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($pretraga); ?>" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Odbij</button>
+                      </form>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+              <?php if (empty($uplate)): ?>
+                <tr><td colspan="6" class="text-muted">Nema uplata za izabrani filter.</td></tr>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+        <p class="small text-muted mb-0">
+          Danas: <?php echo $uplateDanas['broj']; ?> uspešnih uplata · <?php echo Format::novac($uplateDanas['zbir']); ?>
+        </p>
+      </div>
+    </div>
 
     <div class="row g-3">
       <!-- Forma: novo obaveštenje ili izmena -->
