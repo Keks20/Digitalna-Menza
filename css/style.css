@@ -406,6 +406,16 @@ form {
   color: #fff;
 }
 
+/* Podnaslov ispod naziva u admin meniju */
+.sidebar-role {
+  margin-top: 1px;
+  color: #f0b45a;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
 .sidebar-logo {
   width: 40px;
   height: 40px;
@@ -712,6 +722,46 @@ form {
 .tag-green {
   background: #e3f5ea;
   color: #23884c;
+}
+
+.tag-orange {
+  background: #fdf0e1;
+  color: #d9731c;
+}
+
+.tag-red {
+  background: #fde8e8;
+  color: #c62828;
+}
+
+.tag-blue {
+  background: #e6eefb;
+  color: #1e5fc0;
+}
+
+.tag-gray {
+  background: #eceff4;
+  color: #5b6475;
+}
+
+/* Oznaka "Osoblje" pored naziva na prijavi za zaposlene */
+.tag-staff {
+  margin-left: 0;
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
+/* Forme unutar aplikacije nemaju razmak iznad (on važi samo za prijavu) */
+.app-main form {
+  margin-top: 0;
+}
+
+/* Poruke posle čuvanja (Bootstrap alert u našem stilu) */
+.app-alert {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
 }
 
 /* Plavi okvir sa napomenom (ikonica i tekst) */

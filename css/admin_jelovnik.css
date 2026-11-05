@@ -1,0 +1,229 @@
+/* =========================================================
+   Admin: Jelovnik i cene (Figma: Admin-jelovnik-racunar)
+   Učitava se posle style.css i jelovnik.css (odatle su dugmad
+   za menze .btn-choice i za dane .day-btn).
+   ========================================================= */
+
+/* Admin stranice su šire (dve kolone) */
+.app-main-wide {
+  max-width: 1320px;
+}
+
+.panel-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Nedelja sa strelicama, desno od menzi */
+.week-switch {
+  color: var(--muted);
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.week-label {
+  padding: 0 4px;
+}
+
+/* Tačkica sa statusom dana u uglu dugmeta */
+.day-btn {
+  position: relative;
+}
+
+.day-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-objavljen { background: #2f9e5b; }
+.status-u_izmeni  { background: #e8832a; }
+.status-nije_unet { background: #c3c9d4; }
+
+.day-btn.active .day-dot {
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+/* Izabrani dan iznad formi */
+.day-heading {
+  font-size: 14.5px;
+  color: var(--muted);
+}
+
+.day-heading strong {
+  color: var(--text);
+}
+
+/* ---------- Kartice sa jelima ---------- */
+.meal-form {
+  padding: 22px;
+}
+
+.meal-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.meal-hours {
+  margin-top: 1px !important;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.dish-row {
+  gap: 14px;
+}
+
+.dish-row + .dish-row {
+  margin-top: 10px;
+}
+
+/* Polje za unos u aplikaciji (isti izgled kao na prijavi) */
+.app-input {
+  height: 46px;
+  padding: 0 14px;
+  background-color: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.app-input::placeholder {
+  color: #9aa1b1;
+}
+
+.app-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(30, 95, 192, 0.15);
+}
+
+.posno-check {
+  flex-shrink: 0;
+  padding-left: 23px;
+}
+
+.posno-check .form-check-label {
+  font-size: 14px;
+}
+
+/* ---------- Dugmad ---------- */
+.btn-app {
+  --bs-btn-bg: var(--blue);
+  --bs-btn-border-color: var(--blue);
+  --bs-btn-hover-bg: var(--blue-hover);
+  --bs-btn-hover-border-color: var(--blue-hover);
+  --bs-btn-active-bg: var(--blue-hover);
+  --bs-btn-active-border-color: var(--blue-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-app .ikonica {
+  width: 17px;
+  height: 17px;
+}
+
+.btn-app-outline {
+  --bs-btn-bg: #fff;
+  --bs-btn-color: var(--text);
+  --bs-btn-border-color: #dfe3eb;
+  --bs-btn-hover-bg: #fff;
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-hover-border-color: #b9c6dd;
+  --bs-btn-active-bg: #f3f5f8;
+  --bs-btn-active-color: var(--text);
+  --bs-btn-active-border-color: #b9c6dd;
+}
+
+/* ---------- Cene (desno) ---------- */
+.panel .field {
+  margin-bottom: 16px;
+}
+
+.panel .field .form-control {
+  padding-right: 14px;
+}
+
+/* ---------- Status nedelje ---------- */
+.status-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  font-size: 14.5px;
+}
+
+.status-list li + li {
+  border-top: 1px solid #e8ebf1;
+}
+
+.status-list li:last-child {
+  padding-bottom: 0;
+}
+
+.status-list a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.status-list a:hover {
+  color: var(--blue);
+}
+
+.status-list a.is-selected {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.status-list .tag {
+  margin-left: 0;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 991.98px) {
+  .meal-form {
+    padding: 18px;
+  }
+
+  .week-switch {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0 !important;
+  }
+
+  .dish-row {
+    gap: 10px;
+  }
+
+  .day-dot {
+    top: 4px;
+    right: 4px;
+    width: 5px;
+    height: 5px;
+  }
+
+  .form-actions .btn-app {
+    flex: 1 1 100%;
+  }
+}
