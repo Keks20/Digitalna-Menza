@@ -77,4 +77,13 @@ class SmestajRepository extends BaseRepository
         $row = $stmt->get_result()->fetch_assoc();
         return $row ? $this->mapRow($row) : null;
     }
+
+    /**
+     * Nazivi svih domova (za izbor "Kome se šalje" kod obaveštenja): ['Dom 1', ...]
+     */
+    public function domovi(): array
+    {
+        $result = $this->conn->query('SELECT DISTINCT dom FROM sobe ORDER BY dom');
+        return array_column($result->fetch_all(MYSQLI_ASSOC), 'dom');
+    }
 }

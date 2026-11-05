@@ -15,7 +15,7 @@
  *   $menze            array             [['id', 'naziv', 'adresa', ...], ...]
  *   $tipoviObroka     TipObroka[]       doručak, ručak, večera (naziv, cena, radnoVreme())
  *   $jelovnikDanas    array             [menza_id => [tip_obroka_id => [StavkaJelovnika, ...]]]
- *   $poruke           array             poslednja 3 obaveštenja: naslov, tekst, kreirano, menza
+ *   $poruke           array             poslednja 3 obaveštenja za ovog studenta: naslov, tekst, kreirano, menza_id, menza
  */
 require_once __DIR__ . '/includes/provera_prijave.php';
 require_once __DIR__ . '/src/StudentRepository.php';
@@ -39,7 +39,7 @@ $obroci = (new KupljeniObrokRepository())->stanjeZaMesec($karticaId, $tekuciMese
 $stanarina = (new SmestajRepository())->tekuceZaduzenje($studentId);
 $menze = (new MenzaRepository())->list();
 $tipoviObroka = (new TipObrokaRepository())->list();
-$poruke = (new ObavestenjeRepository())->list(['limit' => 3]);
+$poruke = (new ObavestenjeRepository())->zaStudenta($studentId, 3);
 
 $preostaloUkupno = array_sum(array_column($obroci, 'preostalo'));
 
