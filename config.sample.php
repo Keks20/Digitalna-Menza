@@ -1,7 +1,7 @@
 <?php
 // Podrazumevana podešavanja za XAMPP (root bez lozinke).
-// Ako ti je baza drugačije podešena, kopiraj ovaj fajl u config.local.php
-// i promeni vrednosti tamo (config.local.php se ne šalje na GitHub).
+// Za drugačije podešenu bazu: kopija ovog fajla kao config.local.php sa svojim vrednostima
+// (config.local.php se ne šalje na GitHub).
 return [
     'db_host' => '127.0.0.1',
     'db_name' => 'menza_db',

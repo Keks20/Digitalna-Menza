@@ -57,6 +57,14 @@ class Format
         return substr($vreme, 0, 5);
     }
 
+    /** Cena obroka bez nepotrebnih decimala: 90 -> "90 RSD", 92.5 -> "92,50 RSD" */
+    public static function cena($iznos): string
+    {
+        $iznos = (float)$iznos;
+        $decimale = ($iznos == floor($iznos)) ? 0 : 2;
+        return number_format($iznos, $decimale, ',', '.') . ' RSD';
+    }
+
     /** "2026-11-05" -> "Čet" (za dugmad sa danima u nedelji) */
     public static function danKratko(string $datum): string
     {

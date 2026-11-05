@@ -1,6 +1,6 @@
 <?php
 /**
- * LOGIKA: dnevni i nedeljni jelovnik (backend – Luka).
+ * LOGIKA: dnevni i nedeljni jelovnik.
  * Izgled je u views/jelovnik.view.php.
  *
  * Adresa: jelovnik.php?menza=2&dan=2026-11-05
@@ -26,6 +26,7 @@ require_once __DIR__ . '/src/MenzaRepository.php';
 require_once __DIR__ . '/src/TipObrokaRepository.php';
 require_once __DIR__ . '/src/JelovnikRepository.php';
 require_once __DIR__ . '/src/Format.php';
+require_once __DIR__ . '/src/Kalendar.php';
 
 $student = (new StudentRepository())->read($studentId);
 $menze = (new MenzaRepository())->list();
@@ -40,14 +41,10 @@ foreach ($menze as $menza) {
         $izabranaMenza = $menza;
     }
 }
+$izabranaMenzaId = (int)$izabranaMenza['id'];
 
 // ---------- Izabrani dan (iz adrese, inače danas) ----------
-// Strogo proveravamo format, da u upit ne bi otišlo nešto što nije datum
-$izabraniDan = $danas;
-$datumIzAdrese = DateTime::createFromFormat('!Y-m-d', $_GET['dan'] ?? '');
-if ($datumIzAdrese && $datumIzAdrese->format('Y-m-d') === ($_GET['dan'] ?? '')) {
-    $izabraniDan = $datumIzAdrese->format('Y-m-d');
-}
+$izabraniDan = Kalendar::datumIzAdrese($_GET['dan'] ?? null, $danas);
 
 /** Link ka jelovniku za datu menzu i dan */
 function jelovnikUrl(int $menzaId, string $dan): string
@@ -55,33 +52,22 @@ function jelovnikUrl(int $menzaId, string $dan): string
     return 'jelovnik.php?' . http_build_query(['menza' => $menzaId, 'dan' => $dan]);
 }
 
-// ---------- Nedelja u kojoj je izabrani dan (ponedeljak–nedelja) ----------
-$ponedeljak = date('Y-m-d', strtotime($izabraniDan . ' -' . (date('N', strtotime($izabraniDan)) - 1) . ' days'));
-$izabranaMenzaId = (int)$izabranaMenza['id'];
-
 // Dugmad za menze: link zadržava izabrani dan
 foreach ($menze as $i => $menza) {
     $menze[$i]['izabrana'] = (int)$menza['id'] === $izabranaMenzaId;
     $menze[$i]['url'] = jelovnikUrl((int)$menza['id'], $izabraniDan);
 }
 
-$dani = [];
-for ($i = 0; $i < 7; $i++) {
-    $datum = date('Y-m-d', strtotime($ponedeljak . ' +' . $i . ' days'));
-    $dani[] = [
-        'datum' => $datum,
-        'dan' => Format::danKratko($datum),
-        'broj' => (int)date('j', strtotime($datum)),
-        'izabran' => $datum === $izabraniDan,
-        'danas' => $datum === $danas,
-        'url' => jelovnikUrl($izabranaMenzaId, $datum),
-    ];
+// ---------- Nedelja u kojoj je izabrani dan (ponedeljak–nedelja) ----------
+$dani = Kalendar::daniNedelje($izabraniDan);
+foreach ($dani as $i => $dan) {
+    $dani[$i]['url'] = jelovnikUrl($izabranaMenzaId, $dan['datum']);
 }
 
-$nedeljaOpis = Format::nedelja($ponedeljak);
+$nedeljaOpis = Format::nedelja(Kalendar::ponedeljak($izabraniDan));
 // Strelice vode na isti dan u prethodnoj / sledećoj nedelji
-$prethodnaNedeljaUrl = jelovnikUrl($izabranaMenzaId, date('Y-m-d', strtotime($izabraniDan . ' -7 days')));
-$sledecaNedeljaUrl = jelovnikUrl($izabranaMenzaId, date('Y-m-d', strtotime($izabraniDan . ' +7 days')));
+$prethodnaNedeljaUrl = jelovnikUrl($izabranaMenzaId, Kalendar::pomeri($izabraniDan, -7));
+$sledecaNedeljaUrl = jelovnikUrl($izabranaMenzaId, Kalendar::pomeri($izabraniDan, 7));
 
 // ---------- Jelovnik za izabrani dan ----------
 $jelovnik = (new JelovnikRepository())->zaDan($izabranaMenzaId, $izabraniDan);

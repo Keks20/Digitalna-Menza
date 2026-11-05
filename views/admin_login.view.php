@@ -2,7 +2,7 @@
 /**
  * PRIKAZ: prijava zaposlenih SC-a (administrator i kasir).
  *
- * PRIVREMENI IZGLED (Luka) – kolega ga menja dizajnom iz Figme (ekran "Admin-prijava").
+ * Privremeni raspored – konačni izgled je ekran "Admin-prijava" u Figmi.
  * Spisak promenljivih koje stižu iz admin_login.php je na vrhu tog fajla.
  * Polja forme moraju da se zovu: korisnicko_ime, lozinka, csrf_token.
  */

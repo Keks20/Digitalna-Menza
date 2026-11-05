@@ -2,7 +2,7 @@
 /**
  * PRIKAZ: administratorski pregled.
  *
- * PRIVREMENI IZGLED (Luka) – statistika iz Figme (ekran "Admin") dolazi u nedelji 6.
+ * Privremeni raspored – konačni izgled sa statistikom je ekran "Admin" u Figmi.
  * Spisak promenljivih je na vrhu admin_pocetna.php.
  */
 $naslovStrane = 'Pregled';

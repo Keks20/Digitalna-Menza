@@ -1,6 +1,6 @@
 <?php
 /**
- * PRIKAZ: prijava studenta (izgled po Figmi – kolega).
+ * PRIKAZ: prijava studenta (izgled po Figmi, ekran "Prijava").
  *
  * Promenljive koje dobija iz login.php:
  *   $greska       string  poruka o grešci posle neuspešne prijave ('' ako je nema)
