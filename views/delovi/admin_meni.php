@@ -1,44 +1,69 @@
 <?php
 /**
- * Meni za zaposlene SC-a (bočni meni "ADMINISTRACIJA" iz Figme).
+ * Meni za zaposlene SC-a (po Figmi: bočni meni "ADMINISTRACIJA" na računaru,
+ * donja traka na telefonu).
  *
  * Stranica pre uključivanja postavlja:
  *   $aktivnaStrana – naziv fajla trenutne stranice, npr. 'admin_pocetna.php'
  * Koristi i $admin (iz includes/provera_admina.php) da kasiru prikaže samo njegove stavke.
  *
- * Stavka je link tek kad njena stranica postoji.
- * Privremeni izgled – po Figmi ide bočni meni na računaru i donja traka na telefonu;
- * niz $stavkeMenija ostaje isti.
+ * Stavka je link tek kad njena stranica postoji (inače je zatamnjena).
  */
+require_once __DIR__ . '/ikonice.php';
+
 $aktivnaStrana = $aktivnaStrana ?? '';
 
+// 'traka' = kratak naziv u donjoj traci na telefonu (null = samo u bočnom meniju)
 $stavkeMenija = [
-    ['fajl' => 'admin_pocetna.php',  'naziv' => 'Pregled',              'uloge' => ['admin']],
-    ['fajl' => 'admin_jelovnik.php', 'naziv' => 'Jelovnik i cene',      'uloge' => ['admin']],
-    ['fajl' => 'admin_uplate.php',   'naziv' => 'Uplate i obaveštenja', 'uloge' => ['admin']],
-    ['fajl' => 'kasir_bonovi.php',   'naziv' => 'Provera bonova',       'uloge' => ['admin', 'kasir']],
-    ['fajl' => 'admin_smestaj.php',  'naziv' => 'Smeštaj',              'uloge' => ['admin']],
-    ['fajl' => 'admin_studenti.php', 'naziv' => 'Studenti',             'uloge' => ['admin']],
+    ['fajl' => 'admin_pocetna.php',  'naziv' => 'Pregled',              'ikonica' => 'pregled',  'traka' => 'Pregled',  'uloge' => ['admin']],
+    ['fajl' => 'admin_jelovnik.php', 'naziv' => 'Jelovnik i cene',      'ikonica' => 'kalendar', 'traka' => 'Jelovnik', 'uloge' => ['admin']],
+    ['fajl' => 'admin_uplate.php',   'naziv' => 'Uplate i obaveštenja', 'ikonica' => 'novac',    'traka' => 'Uplate',   'uloge' => ['admin']],
+    ['fajl' => 'kasir_bonovi.php',   'naziv' => 'Provera bonova',       'ikonica' => 'qr',       'traka' => 'Bonovi',   'uloge' => ['admin', 'kasir']],
+    ['fajl' => 'admin_smestaj.php',  'naziv' => 'Smeštaj',              'ikonica' => 'kuca',     'traka' => null,       'uloge' => ['admin']],
+    ['fajl' => 'admin_studenti.php', 'naziv' => 'Studenti',             'ikonica' => 'studenti', 'traka' => null,       'uloge' => ['admin']],
 ];
+$stavkeMenija = array_values(array_filter($stavkeMenija, fn($s) => in_array($admin->uloga, $s['uloge'], true)));
+
+/** Jedna stavka: link ako stranica postoji, inače zatamnjen tekst. */
+$stavkaAdminMenija = function (array $stavka, string $klasa, string $tekst) use ($aktivnaStrana): string {
+    $postoji = file_exists(__DIR__ . '/../../' . $stavka['fajl']);
+    $aktivna = $stavka['fajl'] === $aktivnaStrana;
+    $sadrzaj = ikonica($stavka['ikonica']) . '<span>' . htmlspecialchars($tekst) . '</span>';
+
+    if (!$postoji) {
+        return '<span class="' . $klasa . ' disabled" title="Stranica još nije napravljena">' . $sadrzaj . '</span>';
+    }
+    return '<a href="' . $stavka['fajl'] . '" class="' . $klasa . ($aktivna ? ' active' : '') . '"'
+        . ($aktivna ? ' aria-current="page"' : '') . '>' . $sadrzaj . '</a>';
+};
 ?>
-<nav class="bg-dark mb-4">
-  <div class="container d-flex flex-wrap align-items-center gap-1 py-2" style="max-width: 1100px;">
-    <span class="fw-bold text-white me-1">Digitalna menza</span>
-    <span class="small text-warning me-3">ADMINISTRACIJA</span>
+  <!-- BOČNI MENI (računar) -->
+  <nav class="app-sidebar d-none d-lg-flex flex-column" aria-label="Meni administracije">
+    <a href="<?php echo $admin->jeAdmin() ? 'admin_pocetna.php' : 'kasir_bonovi.php'; ?>" class="sidebar-brand d-flex align-items-center">
+      <span class="sidebar-logo"><?php echo ikonica('solja'); ?></span>
+      <span class="d-flex flex-column">
+        <span>Digitalna menza</span>
+        <span class="sidebar-role">Administracija</span>
+      </span>
+    </a>
+
+    <div class="d-flex flex-column gap-1">
+      <?php foreach ($stavkeMenija as $stavka): ?>
+        <?php echo $stavkaAdminMenija($stavka, 'sidebar-link', $stavka['naziv']); ?>
+      <?php endforeach; ?>
+    </div>
+
+    <div class="mt-auto d-flex flex-column gap-1">
+      <a href="admin_logout.php" class="sidebar-link"><?php echo ikonica('odjava'); ?><span>Odjava</span></a>
+    </div>
+  </nav>
+
+  <!-- DONJA TRAKA (telefon) -->
+  <nav class="app-tabbar d-flex d-lg-none" aria-label="Meni administracije">
     <?php foreach ($stavkeMenija as $stavka): ?>
-      <?php if (!in_array($admin->uloga, $stavka['uloge'], true)) continue; ?>
-      <?php if (file_exists(__DIR__ . '/../../' . $stavka['fajl'])): ?>
-        <a href="<?php echo $stavka['fajl']; ?>"
-           class="btn btn-sm <?php echo $stavka['fajl'] === $aktivnaStrana ? 'btn-primary' : 'btn-outline-light'; ?>">
-          <?php echo $stavka['naziv']; ?>
-        </a>
-      <?php else: ?>
-        <span class="btn btn-sm btn-outline-light disabled" title="Stranica još nije napravljena"><?php echo $stavka['naziv']; ?></span>
+      <?php if ($stavka['traka'] !== null): ?>
+        <?php echo $stavkaAdminMenija($stavka, 'tabbar-link', $stavka['traka']); ?>
       <?php endif; ?>
     <?php endforeach; ?>
-    <span class="ms-auto text-white small me-2">
-      <?php echo htmlspecialchars($admin->ime_prezime); ?> · <?php echo $admin->nazivUloge(); ?>
-    </span>
-    <a href="admin_logout.php" class="btn btn-sm btn-light">Odjava</a>
-  </div>
-</nav>
+    <a href="admin_logout.php" class="tabbar-link"><?php echo ikonica('odjava'); ?><span>Odjava</span></a>
+  </nav>

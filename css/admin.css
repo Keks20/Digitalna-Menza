@@ -1,0 +1,141 @@
+/* =========================================================
+   Admin: Pregled i Kasir: Provera bonova
+   (Figma: Admin-racunar, Kasir-provera-bonova-telefon)
+   Učitava se posle style.css.
+   ========================================================= */
+
+.app-main-wide {
+  max-width: 1320px;
+}
+
+/* ---------- Pregled ---------- */
+.welcome-panel {
+  padding: 22px;
+}
+
+.avatar-lg {
+  width: 52px;
+  height: 52px;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.welcome-text {
+  margin-top: 4px !important;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Kartica sekcije (link) */
+.section-card {
+  padding: 22px;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+a.section-card:hover {
+  color: var(--text);
+  border-color: #c9d6ee;
+  box-shadow: 0 6px 18px rgba(11, 37, 69, 0.08);
+  transform: translateY(-1px);
+}
+
+a.section-card:focus-visible {
+  outline: 3px solid rgba(30, 95, 192, 0.3);
+  outline-offset: 2px;
+}
+
+.section-card.is-disabled {
+  opacity: 0.6;
+}
+
+.section-arrow {
+  color: var(--blue);
+}
+
+.section-title {
+  margin: 16px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.section-text {
+  margin-top: 6px !important;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* ---------- Kasir: okvir skenera ---------- */
+.scanner {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-height: 380px;
+  width: 100%;
+  border-radius: 16px;
+  background: var(--navy);
+  overflow: hidden;
+}
+
+.scanner-corner {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 0 solid rgba(255, 255, 255, 0.9);
+}
+
+.scanner-corner.tl { top: 15%; left: 24%; border-top-width: 4px; border-left-width: 4px; }
+.scanner-corner.tr { top: 15%; right: 24%; border-top-width: 4px; border-right-width: 4px; }
+.scanner-corner.bl { bottom: 22%; left: 24%; border-bottom-width: 4px; border-left-width: 4px; }
+.scanner-corner.br { bottom: 22%; right: 24%; border-bottom-width: 4px; border-right-width: 4px; }
+
+.scanner-line {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 46%;
+  height: 2px;
+  background: #3ecf7a;
+  box-shadow: 0 0 12px rgba(62, 207, 122, 0.7);
+  opacity: 0.55;
+}
+
+.scanner-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  padding: 0 16px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 991.98px) {
+  .scanner {
+    aspect-ratio: 1 / 1;
+  }
+
+  .scanner-corner {
+    width: 36px;
+    height: 36px;
+  }
+
+  .scanner-corner.tl,
+  .scanner-corner.tr { top: 14%; }
+
+  .scanner-corner.bl,
+  .scanner-corner.br { bottom: 28%; }
+
+  .scanner-text {
+    bottom: 16px;
+    font-size: 13px;
+  }
+}
