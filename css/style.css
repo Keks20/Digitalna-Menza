@@ -764,6 +764,113 @@ form {
   font-size: 14px;
 }
 
+/* Obaveštenje u listi (početna, "Sve poruke", admin) */
+.message {
+  gap: 16px;
+  padding: 22px 0 20px;
+  border-top: 1px solid #eceff4;
+}
+
+.message:last-child {
+  padding-bottom: 0;
+}
+
+.message-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.message-text {
+  margin-top: 4px !important;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.message-meta {
+  margin-top: 4px !important;
+  color: #7c8496;
+  font-size: 12.5px;
+}
+
+/* ---------- Polja, dugmad i naslovi u aplikaciji ---------- */
+/* Admin stranice su šire (dve kolone) */
+.app-main-wide {
+  max-width: 1320px;
+}
+
+.panel-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Polje za unos u aplikaciji (isti izgled kao na prijavi) */
+.app-input {
+  height: 46px;
+  padding: 0 14px;
+  background-color: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.app-input::placeholder {
+  color: #9aa1b1;
+}
+
+.app-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(30, 95, 192, 0.15);
+}
+
+.btn-app {
+  --bs-btn-bg: var(--blue);
+  --bs-btn-border-color: var(--blue);
+  --bs-btn-hover-bg: var(--blue-hover);
+  --bs-btn-hover-border-color: var(--blue-hover);
+  --bs-btn-active-bg: var(--blue-hover);
+  --bs-btn-active-border-color: var(--blue-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-app .ikonica {
+  width: 17px;
+  height: 17px;
+}
+
+.btn-app-outline {
+  --bs-btn-bg: #fff;
+  --bs-btn-color: var(--text);
+  --bs-btn-border-color: #dfe3eb;
+  --bs-btn-hover-bg: #fff;
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-hover-border-color: #b9c6dd;
+  --bs-btn-active-bg: #f3f5f8;
+  --bs-btn-active-color: var(--text);
+  --bs-btn-active-border-color: #b9c6dd;
+}
+
+/* Polje sa ikonicom unutar kartice */
+.panel .field {
+  margin-bottom: 16px;
+}
+
+.panel .field .form-control {
+  padding-right: 14px;
+}
+
 /* Plavi okvir sa napomenom (ikonica i tekst) */
 .note-box {
   display: flex;
