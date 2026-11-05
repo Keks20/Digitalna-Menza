@@ -7,4 +7,6 @@ return [
     'db_name' => 'menza_db',
     'db_user' => 'root',
     'db_pass' => '',
+    // Tajni ključ za potpis QR bonova (na pravom serveru obavezno drugačiji, u config.local.php)
+    'qr_tajna' => 'digitalna-menza-razvoj-2026',
 ];
