@@ -75,13 +75,15 @@ $poslednjaNaStrani = ($strana - 1) * $poStrani + count($transakcije);
               <input type="hidden" name="tip" value="<?php echo htmlspecialchars($tip); ?>" />
             <?php endif; ?>
             <p class="form-label mb-2" id="periodOznaka">Period</p>
-            <div class="d-flex flex-wrap align-items-center gap-2" role="group" aria-labelledby="periodOznaka">
-              <input type="date" class="form-control app-input" name="od" value="<?php echo htmlspecialchars($od); ?>"
-                     max="<?php echo date('Y-m-d'); ?>" aria-label="Od datuma" required />
-              <span class="text-muted" aria-hidden="true">–</span>
-              <input type="date" class="form-control app-input" name="do" value="<?php echo htmlspecialchars($do); ?>"
-                     max="<?php echo date('Y-m-d'); ?>" aria-label="Do datuma" required />
-              <button type="submit" class="btn btn-primary btn-app">Prikaži</button>
+            <div class="d-flex flex-wrap gap-2" role="group" aria-labelledby="periodOznaka">
+              <div class="period-dates">
+                <input type="date" class="form-control app-input" name="od" value="<?php echo htmlspecialchars($od); ?>"
+                       max="<?php echo date('Y-m-d'); ?>" aria-label="Od datuma" required />
+                <span class="text-muted" aria-hidden="true">–</span>
+                <input type="date" class="form-control app-input" name="do" value="<?php echo htmlspecialchars($do); ?>"
+                       max="<?php echo date('Y-m-d'); ?>" aria-label="Do datuma" required />
+              </div>
+              <button type="submit" class="btn btn-primary btn-app period-btn">Prikaži</button>
             </div>
           </form>
 
@@ -111,7 +113,7 @@ $poslednjaNaStrani = ($strana - 1) * $poStrani + count($transakcije);
     </div>
 
     <!-- TABELA -->
-    <section class="panel">
+    <section class="panel tx-panel">
       <?php if (empty($transakcije)): ?>
         <div class="empty-state text-center">
           <span class="tint-box tint-blue mx-auto"><?php echo ikonica('istorija'); ?></span>
