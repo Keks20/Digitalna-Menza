@@ -8,7 +8,7 @@ require_once __DIR__ . '/Format.php';
  * Evidencija novca.
  *
  * Obični create() samo upisuje red i NE menja stanje kartice. Novac se pomera
- * metodama uplati(), potvrdiUplatu() i kupiObroke(): one u jednoj transakciji baze menjaju
+ * metodama uplati(), potvrdiUplatu(), kupiObroke() i platiStanarinu(): one u jednoj transakciji baze menjaju
  * stanje kartice i upisuju transakciju, pa stanje i istorija nikad ne mogu da se razilaze.
  */
 class TransakcijaRepository extends BaseRepository
@@ -420,6 +420,84 @@ class TransakcijaRepository extends BaseRepository
                 $stmt->bind_param('iisidi', $karticaId, $tipId, $mesec, $stavka['kolicina'], $stavka['cena'], $transakcijaId);
                 $stmt->execute();
             }
+
+            $this->conn->commit();
+            return $transakcijaId;
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            throw $e;
+        }
+    }
+
+    // =================================================================
+    // Stanarina (plaćanje sa studentske kartice)
+    // =================================================================
+
+    /**
+     * Plaćanje jednog zaduženja za smeštaj sa studentske kartice.
+     * U jednoj transakciji baze: skida novac, upisuje transakciju tipa 'smestaj'
+     * i označava zaduženje kao plaćeno (sa vezom na transakciju).
+     *
+     * Vraća id transakcije. Baca RuntimeException sa porukom za studenta kad zaduženje nije njegovo,
+     * kad je već plaćeno, kad je kartica blokirana ili nema dovoljno novca.
+     */
+    public function platiStanarinu(int $karticaId, int $studentId, int $zaduzenjeId): int
+    {
+        $this->conn->begin_transaction();
+        try {
+            // Isti redosled zaključavanja kao kod kupovine obroka: prvo kartica, pa zaduženje
+            $stmt = $this->conn->prepare('SELECT stanje, status FROM kartice WHERE id = ? AND student_id = ? FOR UPDATE');
+            $stmt->bind_param('ii', $karticaId, $studentId);
+            $stmt->execute();
+            $kartica = $stmt->get_result()->fetch_assoc();
+            if (!$kartica) {
+                throw new RuntimeException('Kartica ne postoji.');
+            }
+
+            $stmt = $this->conn->prepare(
+                'SELECT z.iznos, z.mesec, z.placeno, s.dom, s.paviljon, s.broj AS soba
+                 FROM smestaj_zaduzenja z
+                 JOIN smestaj_ugovori u ON u.id = z.ugovor_id
+                 JOIN sobe s ON s.id = u.soba_id
+                 WHERE z.id = ? AND u.student_id = ?
+                 FOR UPDATE'
+            );
+            $stmt->bind_param('ii', $zaduzenjeId, $studentId);
+            $stmt->execute();
+            $zaduzenje = $stmt->get_result()->fetch_assoc();
+
+            if (!$zaduzenje) {
+                throw new RuntimeException('Zaduženje ne postoji.');
+            }
+            if ((int)$zaduzenje['placeno'] === 1) {
+                throw new RuntimeException('Stanarina za ' . Format::mesecGodina($zaduzenje['mesec']) . ' je već plaćena.');
+            }
+            if ($kartica['status'] !== 'aktivna') {
+                throw new RuntimeException('Kartica je blokirana – obratite se Studentskom centru.');
+            }
+            $iznos = (float)$zaduzenje['iznos'];
+            if ((float)$kartica['stanje'] < $iznos) {
+                throw new RuntimeException('Nema dovoljno novca na kartici. Potrebno je ' . Format::novac($iznos)
+                    . ', a na kartici je ' . Format::novac($kartica['stanje']) . '.');
+            }
+
+            $novoStanje = $this->dodajNaStanje($karticaId, -$iznos);
+
+            // "Stanarina za oktobar 2026 – Dom 1, A 214"
+            $opis = 'Stanarina za ' . Format::mesecGodina($zaduzenje['mesec']) . ' – '
+                . $zaduzenje['dom'] . ', ' . $zaduzenje['paviljon'] . ' ' . $zaduzenje['soba'];
+            $tip = 'smestaj';
+            $nacin = 'kartica';
+            $status = 'uspesno';
+            $iznosTransakcije = -$iznos;
+            $stmt = $this->conn->prepare('INSERT INTO transakcije (kartica_id, tip, nacin, iznos, stanje_posle, status, opis) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param('issddss', $karticaId, $tip, $nacin, $iznosTransakcije, $novoStanje, $status, $opis);
+            $stmt->execute();
+            $transakcijaId = $this->conn->insert_id;
+
+            $stmt = $this->conn->prepare('UPDATE smestaj_zaduzenja SET placeno = 1, datum_placanja = NOW(), transakcija_id = ? WHERE id = ?');
+            $stmt->bind_param('ii', $transakcijaId, $zaduzenjeId);
+            $stmt->execute();
 
             $this->conn->commit();
             return $transakcijaId;
