@@ -23,6 +23,7 @@ $stavkeMenija = [
     ['fajl' => 'jelovnik.php', 'naziv' => 'Jelovnik',        'ikonica' => 'kalendar', 'traka' => 'Jelovnik'],
     ['fajl' => 'smestaj.php',  'naziv' => 'Smeštaj',         'ikonica' => 'kuca',     'traka' => null],
     ['fajl' => 'istorija.php', 'naziv' => 'Istorija',        'ikonica' => 'istorija', 'traka' => null],
+    ['fajl' => 'kviz.php',     'naziv' => 'Kviz',            'ikonica' => 'kviz',     'traka' => null],
 ];
 $profil = ['fajl' => 'profil.php', 'naziv' => 'Profil', 'ikonica' => 'korisnik', 'traka' => null];
 
