@@ -1,0 +1,156 @@
+/* =========================================================
+   Admin: Smeštaj (u Figmi nema ekrana – prati "Uplate i obaveštenja")
+   Učitava se posle style.css, jelovnik.css i admin_uplate.css
+   (.btn-choice, .btn-choice-sm, .choice-count, .payments-search, .week-arrow).
+   ========================================================= */
+
+/* ---------- Mesec ---------- */
+.month-switch {
+  gap: 6px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #e6e9f0;
+  border-radius: 10px;
+}
+
+.month-switch .week-arrow {
+  width: 34px;
+  height: 34px;
+}
+
+.month-name {
+  min-width: 140px;
+  text-align: center;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+/* ---------- Zbir ---------- */
+.stat-card {
+  padding: 18px 20px;
+}
+
+.stat-num {
+  margin-top: 12px !important;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.stat-num span {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.stat-money {
+  font-size: 20px;
+}
+
+.stat-text {
+  margin-top: 4px !important;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+/* ---------- Filter ---------- */
+.dorm-select {
+  height: 40px;
+  min-width: 150px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 14px;
+}
+
+/* ---------- Tabela ---------- */
+.rent-head,
+.rent-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.2fr 1fr 0.9fr 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.rent-head {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  background: #f3f5f8;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.rent-row {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8ebf1;
+  font-size: 14.5px;
+}
+
+.rent-row.is-late {
+  background: #fff8f8;
+}
+
+.rent-name {
+  font-weight: 700;
+}
+
+.rent-sub,
+.rent-room,
+.rent-due {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.rent-amount {
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rent-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rent-paid {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Telefon: student i iznos gore, ostalo ispod */
+@media (max-width: 767.98px) {
+  .rent-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "student amount"
+      "room    status"
+      "due     status";
+    gap: 4px 12px;
+    padding: 12px 6px;
+  }
+
+  .rent-student { grid-area: student; }
+  .rent-room    { grid-area: room; }
+  .rent-due     { grid-area: due; }
+  .rent-amount  { grid-area: amount; }
+  .rent-status  { grid-area: status; justify-content: flex-end; }
+
+  .month-name {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .month-switch {
+    width: 100%;
+  }
+
+  .month-bar form,
+  .month-bar .btn-app {
+    width: 100%;
+  }
+}
