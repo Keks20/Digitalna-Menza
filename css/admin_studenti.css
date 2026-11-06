@@ -1,0 +1,95 @@
+/* =========================================================
+   Admin – Studenti (pretraga i blokiranje kartice)
+   Učitava se posle jelovnik.css i admin_uplate.css
+   (.btn-choice-sm, .choice-count, .payments-search, .pay-name, .pay-sub, .btn-pay, .payments-foot).
+   ========================================================= */
+
+.students-search {
+  max-width: 340px;
+}
+
+.choice-count-gray {
+  background: #eceff4;
+  color: #5b6475;
+}
+
+/* Jedan student: na telefonu kartica u više redova, na računaru kolone kao zaglavlje */
+.student-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "name   status"
+    "school school"
+    "card   balance"
+    "action action";
+  gap: 4px 12px;
+  padding: 14px 0;
+  border-top: 1px solid #eceff4;
+  font-size: 14px;
+}
+
+.students-head + .student-row,
+.payments-tools + .student-row {
+  border-top: 0;
+}
+
+.st-name    { grid-area: name; }
+.st-school  { grid-area: school; }
+.st-card    { grid-area: card; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.st-balance { grid-area: balance; font-weight: 700; white-space: nowrap; text-align: right; }
+.st-status  { grid-area: status; text-align: right; }
+.st-action  { grid-area: action; margin-top: 6px; }
+
+.st-index {
+  margin: 0;
+  font-weight: 500;
+}
+
+.student-row.is-blocked .pay-name {
+  color: #c62828;
+}
+
+.st-page {
+  min-width: 48px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.students-head {
+  gap: 16px;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  background: #f3f5f8;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+@media (min-width: 992px) {
+  .students-head,
+  .student-row {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.4fr) 128px 120px 92px 124px;
+    column-gap: 16px;
+  }
+
+  .student-row {
+    grid-template-areas: "name school card balance status action";
+    align-items: center;
+    padding: 14px 16px;
+  }
+
+  .st-status {
+    text-align: left;
+  }
+
+  .st-action {
+    margin-top: 0;
+    text-align: right;
+  }
+
+  .student-row.is-blocked {
+    background: #fdf6f6;
+    border-radius: 10px;
+  }
+}

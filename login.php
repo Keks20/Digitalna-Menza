@@ -17,6 +17,11 @@ if ($auth->check()) {
 $greska = '';
 $brojKartice = '';
 
+// Student je odjavljen jer mu je kartica blokirana dok je bio prijavljen (includes/provera_prijave.php)
+if (isset($_GET['blokirana'])) {
+    $greska = 'Kartica je blokirana. Javi se na šalter Studentskog centra.';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $brojKartice = trim($_POST['broj_kartice'] ?? '');
     $lozinka = $_POST['lozinka'] ?? '';

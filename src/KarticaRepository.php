@@ -48,6 +48,21 @@ class KarticaRepository extends BaseRepository
         return $stmt->execute();
     }
 
+    /**
+     * Blokiranje / odblokiranje kartice (admin "Studenti").
+     * Menja se samo status, nikad stanje. Vraća false ako kartica ne postoji ili već ima taj status.
+     */
+    public function postaviStatus(int $id, string $status): bool
+    {
+        if (!in_array($status, ['aktivna', 'blokirana'], true)) {
+            throw new InvalidArgumentException('Nepoznat status kartice: ' . $status);
+        }
+        $stmt = $this->conn->prepare('UPDATE kartice SET status = ? WHERE id = ? AND status <> ?');
+        $stmt->bind_param('sis', $status, $id, $status);
+        $stmt->execute();
+        return $stmt->affected_rows === 1;
+    }
+
     public function list(array $conditions = [])
     {
         $sql = 'SELECT k.id, k.broj_kartice, k.stanje, k.status, s.ime, s.prezime
