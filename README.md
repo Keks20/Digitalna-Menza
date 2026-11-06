@@ -37,6 +37,11 @@ Tehnologije: PHP 8 (OOP), MySQL/MariaDB (mysqli, prepared statements), Bootstrap
 Test platne kartice (simulacija banke): `4242 4242 4242 4242` – plaćanje prolazi,
 `4000 0000 0000 0002` – banka odbija. Datum isteka bilo koji u budućnosti (npr. `12/29`), CVC bilo koje 3 cifre.
 
+Kasa: student otvori **Moji obroci** i pokaže QR bon (važi 2 minuta, osvežava se svakog minuta), a kasir ga
+na **Provera bonova** skenira kamerom, USB čitačem ili upiše broj kartice. Obrok se izdaje samo u radnom vremenu
+tog obroka (doručak 07:00–09:30, ručak 11:30–15:00, večera 17:30–20:30) i najviše jednom dnevno. Za probu van
+radnog vremena: `Kasa::PROVERAVA_RADNO_VREME = false` u `src/Kasa.php`.
+
 Studenti se prijavljuju na `http://localhost/menza/`, a zaposleni (admin i kasir) na
 `http://localhost/menza/admin_login.php`.
 
@@ -56,22 +61,26 @@ jelovnik.php             LOGIKA jelovnika: izbor menze i dana (?menza=1&dan=2026
 obavestenja.php          sva obaveštenja za studenta (sve, menze i njegov dom)
 dopuna.php               dopuna kartice: iznos i način -> dopuna_kartica.php (platna kartica)
                          ili dopuna_ips.php (IPS QR) -> dopuna_uspesno.php
+istorija.php             istorija transakcija: filter po tipu i periodu, strane, izvoz u CSV i PDF
+kupovina.php             kupovina obroka za tekući ili sledeći mesec (plaćanje sa kartice)
+obroci.php               Moji obroci: preostali obroci, QR bon (?bon=<tip> vraća novi bon kao JSON)
 admin_login.php          prijava zaposlenih (admin i kasir), admin_logout.php – odjava
 admin_pocetna.php        administratorski pregled (samo admin)
 admin_jelovnik.php       unos jelovnika po danu i menzi (nacrt / objava, kopiranje od juče) i cene obroka
 admin_uplate.php         uplate studenata (filter, pretraga, potvrda/odbijanje IPS uplata) i obaveštenja
-kasir_bonovi.php         provera QR bonova (kasir i admin)
+kasir_bonovi.php         provera QR bona i izdavanje obroka na kasi (kasir i admin)
 views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)
   login.view.php
   pocetna.view.php
   jelovnik.view.php
   obavestenja.view.php, dopuna.view.php, dopuna_kartica.view.php, dopuna_ips.view.php, dopuna_uspesno.view.php
+  istorija.view.php, kupovina.view.php, obroci.view.php
   admin_login.view.php, admin_pocetna.view.php, admin_jelovnik.view.php, admin_uplate.view.php, kasir_bonovi.view.php
   delovi/                zajednički delovi: zaglavlje.php (<head>), meni.php, admin_meni.php, podnozje.php
 includes/                provera_prijave.php (student) i provera_admina.php (zaposleni, po ulozi)
 src/                     klase: Database, CrudInterface, BaseRepository, BaseAuth (Auth, AdminAuth),
                          Format, Kalendar, Poruka i Dopuna (pomoćne), PlatniSistem i IpsQr (simulacija banke),
-                         modeli i repozitorijumi
+                         Bon (potpisan QR bon), Kasa (izdavanje obroka), modeli i repozitorijumi
 db/                      schema.sql (struktura) i seed.sql (test podaci)
 css/, js/                stilovi i JavaScript
 config.php               podešavanja baze (config.sample.php / config.local.php)
