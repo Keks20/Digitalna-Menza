@@ -871,6 +871,102 @@ form {
   padding-right: 14px;
 }
 
+/* ---------- Plaćanje: link nazad, pregled iznosa, veliko dugme ---------- */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  color: var(--blue);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.back-link .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
+/* Red "naziv ........ iznos" sa isprekidanom linijom ispod */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dashed #dfe3eb;
+  font-size: 14.5px;
+}
+
+.summary-row > span:first-child {
+  color: var(--muted);
+}
+
+.summary-row > strong,
+.summary-row > span:last-child {
+  text-align: right;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.summary-total .amount {
+  font-size: 22px;
+  letter-spacing: -0.3px;
+}
+
+.amount-green {
+  color: #23884c;
+}
+
+.amount-red {
+  color: #c62828;
+}
+
+.btn-app-lg {
+  height: 52px;
+  font-size: 16px;
+}
+
+/* Svetloplavo dugme (npr. "Simuliraj prijem uplate") */
+.btn-app-soft {
+  --bs-btn-bg: #e6eefb;
+  --bs-btn-color: var(--blue);
+  --bs-btn-border-color: #e6eefb;
+  --bs-btn-hover-bg: #d6e3f8;
+  --bs-btn-hover-color: var(--blue-dark);
+  --bs-btn-hover-border-color: #d6e3f8;
+  --bs-btn-active-bg: #c9daf5;
+  --bs-btn-active-color: var(--blue-dark);
+  --bs-btn-active-border-color: #c9daf5;
+}
+
+/* Okvir oko QR koda (IPS uplata, QR bon) */
+.qr-box {
+  display: inline-flex;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.qr-box img,
+.qr-box canvas {
+  display: block;
+}
+
 /* Plavi okvir sa napomenom (ikonica i tekst) */
 .note-box {
   display: flex;

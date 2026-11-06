@@ -1,0 +1,117 @@
+/* =========================================================
+   Moji obroci (Figma: Moji-obroci-racunar / -telefon)
+   Učitava se posle style.css i jelovnik.css (.btn-choice, .empty-state).
+   ========================================================= */
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.tint-box-lg {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+}
+
+.tint-box-lg .ikonica {
+  width: 21px;
+  height: 21px;
+}
+
+/* ---------- QR bon ---------- */
+.bon-panel {
+  padding: 22px;
+}
+
+.bon-panel .panel-head {
+  text-align: left;
+}
+
+/* Obrok kojeg više nema u mesecu – dugme je bleđe */
+.btn-choice.is-empty:not(.active) {
+  color: #9aa1b1;
+}
+
+.bon-qr {
+  width: 240px;
+  height: 240px;
+}
+
+.bon-title {
+  margin-top: 18px !important;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.bon-meta {
+  margin-top: 6px !important;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.bon-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px !important;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.bon-refresh .ikonica {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- Preostalo u mesecu ---------- */
+.left-row + .left-row {
+  margin-top: 18px;
+}
+
+.left-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.left-progress {
+  height: 6px;
+  margin-top: 8px;
+  background: #e1e6ee;
+  border-radius: 99px;
+}
+
+.left-progress .progress-bar {
+  background: var(--blue);
+  border-radius: 99px;
+}
+
+/* ---------- Poslednja iskorišćenja ---------- */
+.used-row {
+  padding: 8px 0;
+}
+
+.used-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.used-time {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.used-row .tag {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 991.98px) {
+  .bon-panel {
+    padding: 18px;
+  }
+
+  .bon-panel .btn-choice {
+    padding: 0 8px;
+  }
+}
