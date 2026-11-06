@@ -64,11 +64,14 @@ dopuna.php               dopuna kartice: iznos i način -> dopuna_kartica.php (p
 istorija.php             istorija transakcija: filter po tipu i periodu, strane, izvoz u CSV i PDF
 kupovina.php             kupovina obroka za tekući ili sledeći mesec (plaćanje sa kartice)
 obroci.php               Moji obroci: preostali obroci, QR bon (?bon=<tip> vraća novi bon kao JSON)
+smestaj.php              smeštaj: ugovor, mesečna zaduženja, plaćanje stanarine (studentska kartica ili IPS),
+                         smestaj_potvrda.php?id=<zaduženje> – potvrda o plaćanju
 admin_login.php          prijava zaposlenih (admin i kasir), admin_logout.php – odjava
 admin_pocetna.php        administratorski pregled (samo admin)
 admin_jelovnik.php       unos jelovnika po danu i menzi (nacrt / objava, kopiranje od juče) i cene obroka
 admin_uplate.php         uplate studenata (filter, pretraga, potvrda/odbijanje IPS uplata) i obaveštenja
 kasir_bonovi.php         provera QR bona i izdavanje obroka na kasi (kasir i admin)
+admin_smestaj.php        ko je platio stanarinu po mesecu (filter, pretraga) i pravljenje mesečnih zaduženja
 views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)
   login.view.php
   pocetna.view.php
