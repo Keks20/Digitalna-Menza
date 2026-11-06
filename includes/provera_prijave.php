@@ -3,8 +3,12 @@
  * Uključi na vrh svake stranice koja je samo za prijavljene studente:
  *   require_once __DIR__ . '/includes/provera_prijave.php';
  * Posle toga su dostupni $auth, $studentId i $karticaId.
+ *
+ * Ako je administrator u međuvremenu blokirao karticu (admin_studenti.php), student se odjavljuje
+ * na prvom sledećem kliku, pa ne može dalje da dopunjuje karticu, kupuje obroke ni plaća smeštaj.
  */
 require_once __DIR__ . '/../src/Auth.php';
+require_once __DIR__ . '/../src/KarticaRepository.php';
 
 $auth = new Auth();
 if (!$auth->check()) {
@@ -14,3 +18,11 @@ if (!$auth->check()) {
 
 $studentId = $auth->studentId();
 $karticaId = $auth->karticaId();
+
+$karticaUSesiji = (new KarticaRepository())->read($karticaId);
+if (!$karticaUSesiji || !$karticaUSesiji->jeAktivna()) {
+    $auth->logout();
+    header('Location: login.php?blokirana=1');
+    exit;
+}
+unset($karticaUSesiji);
