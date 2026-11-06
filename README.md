@@ -67,7 +67,7 @@ obroci.php               Moji obroci: preostali obroci, QR bon (?bon=<tip> vrać
 smestaj.php              smeštaj: ugovor, mesečna zaduženja, plaćanje stanarine (studentska kartica ili IPS),
                          smestaj_potvrda.php?id=<zaduženje> – potvrda o plaćanju
 admin_login.php          prijava zaposlenih (admin i kasir), admin_logout.php – odjava
-admin_pocetna.php        administratorski pregled (samo admin)
+admin_pocetna.php        administratorski pregled: uplate, prodati i izdati obroci danas, 7 dana, po menzama (samo admin)
 admin_jelovnik.php       unos jelovnika po danu i menzi (nacrt / objava, kopiranje od juče) i cene obroka
 admin_uplate.php         uplate studenata (filter, pretraga, potvrda/odbijanje IPS uplata) i obaveštenja
 kasir_bonovi.php         provera QR bona i izdavanje obroka na kasi (kasir i admin)
@@ -83,7 +83,8 @@ views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez u
 includes/                provera_prijave.php (student) i provera_admina.php (zaposleni, po ulozi)
 src/                     klase: Database, CrudInterface, BaseRepository, BaseAuth (Auth, AdminAuth),
                          Format, Kalendar, Poruka i Dopuna (pomoćne), PlatniSistem i IpsQr (simulacija banke),
-                         Bon (potpisan QR bon), Kasa (izdavanje obroka), modeli i repozitorijumi
+                         Bon (potpisan QR bon), Kasa (izdavanje obroka), Statistika (admin pregled),
+                         modeli i repozitorijumi
 db/                      schema.sql (struktura) i seed.sql (test podaci)
 css/, js/                stilovi i JavaScript
 config.php               podešavanja baze (config.sample.php / config.local.php)

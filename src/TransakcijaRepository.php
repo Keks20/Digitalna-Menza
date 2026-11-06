@@ -349,10 +349,6 @@ class TransakcijaRepository extends BaseRepository
         return (int)$result->fetch_assoc()['broj'];
     }
 
-    /**
-     * Dodaje iznos na stanje kartice i vraća novo stanje.
-     * Poziva se samo unutar otvorene transakcije baze (red kartice ostaje zaključan do commit-a).
-     */
     // =================================================================
     // Kupovina obroka (plaćanje sa studentske kartice)
     // =================================================================
@@ -507,6 +503,10 @@ class TransakcijaRepository extends BaseRepository
         }
     }
 
+    /**
+     * Dodaje iznos na stanje kartice i vraća novo stanje.
+     * Poziva se samo unutar otvorene transakcije baze (red kartice ostaje zaključan do commit-a).
+     */
     private function dodajNaStanje(int $karticaId, float $iznos): float
     {
         $stmt = $this->conn->prepare('SELECT stanje FROM kartice WHERE id = ? FOR UPDATE');
