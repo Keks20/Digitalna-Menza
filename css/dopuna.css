@@ -1,0 +1,272 @@
+/* =========================================================
+   Dopuna kartice – sva 4 koraka
+   (Figma: Dopuna, Dopuna-kartica, Dopuna-IPS, Dopuna-uspesno)
+   Učitava se posle style.css.
+   ========================================================= */
+
+.pay-panel {
+  padding: 22px;
+}
+
+/* Naslov koraka sa brojem u krugu ("1 Iznos dopune") */
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #e6eefb;
+  color: var(--blue);
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---------- 1. Iznos ---------- */
+.amount-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.amount-btn {
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dfe3eb;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.amount-btn:hover {
+  border-color: #b9c6dd;
+}
+
+.btn-check:checked + .amount-btn {
+  background: #e6eefb;
+  border: 1.5px solid var(--blue);
+  color: #12346b;
+}
+
+.btn-check:focus-visible + .amount-btn {
+  outline: 3px solid rgba(30, 95, 192, 0.3);
+  outline-offset: 2px;
+}
+
+/* ---------- 2. Način plaćanja ---------- */
+.pay-option {
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid #dfe3eb;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.pay-option:hover {
+  border-color: #b9c6dd;
+}
+
+.pay-option:has(.pay-radio:checked) {
+  background: #f5f8fe;
+  border: 1.5px solid var(--blue);
+}
+
+.pay-option:has(.pay-radio:focus-visible) {
+  outline: 3px solid rgba(30, 95, 192, 0.3);
+  outline-offset: 2px;
+}
+
+.tint-box-lg {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+}
+
+.tint-box-lg .ikonica {
+  width: 21px;
+  height: 21px;
+}
+
+.pay-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+.pay-name .tag {
+  margin-left: 0;
+}
+
+.pay-desc {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.pay-radio {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.pay-radio:focus {
+  box-shadow: none;
+}
+
+/* ---------- Poslednje uplate ---------- */
+.recent-payment {
+  padding: 8px 0;
+}
+
+.recent-amount {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.recent-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- Plaćanje karticom ---------- */
+.accepted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.accepted .tag {
+  margin-left: 4px;
+}
+
+.pay-cancel {
+  min-width: 130px;
+}
+
+/* ---------- IPS QR ---------- */
+.qr-code {
+  width: 220px;
+  height: 220px;
+}
+
+.ips-steps {
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.ips-steps li {
+  display: flex;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.ips-steps li + li {
+  margin-top: 14px;
+}
+
+.ips-status {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.ips-status .tag {
+  margin-left: 0;
+}
+
+.pay-change {
+  flex: 0 1 auto;
+}
+
+/* ---------- Potvrda uplate ---------- */
+.result-panel {
+  max-width: 560px;
+  padding: 30px;
+}
+
+.result-icon {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.result-icon > span {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.result-icon .ikonica {
+  width: 20px;
+  height: 20px;
+  stroke-width: 3;
+}
+
+.result-green  { background: #e3f5ea; }
+.result-green > span  { background: #2f9e5b; }
+.result-orange { background: #fdf0e1; }
+.result-orange > span { background: #e8832a; }
+.result-red    { background: #fde8e8; }
+.result-red > span    { background: #d64545; }
+
+.result-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.result-text {
+  margin-top: 6px !important;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 991.98px) {
+  .pay-panel,
+  .result-panel {
+    padding: 18px;
+  }
+
+  .amount-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .pay-option {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .pay-change {
+    flex: 1 1 100%;
+  }
+}

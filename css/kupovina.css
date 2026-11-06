@@ -1,0 +1,149 @@
+/* =========================================================
+   Kupovina obroka (Figma: Kupovina-obroka-racunar / -telefon)
+   Učitava se posle style.css i jelovnik.css (.btn-choice za mesec).
+   ========================================================= */
+
+.buy-panel,
+.buy-summary {
+  padding: 22px;
+}
+
+.tint-box-lg {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+}
+
+.tint-box-lg .ikonica {
+  width: 21px;
+  height: 21px;
+}
+
+/* Red za jedan obrok: ikonica, naziv, − broj +, iznos */
+.buy-row {
+  gap: 10px 18px;
+  padding: 18px 0;
+  border-top: 1px solid #e8ebf1;
+}
+
+.buy-row.is-full {
+  opacity: 0.6;
+}
+
+.buy-info {
+  flex: 1 1 0;
+  min-width: 160px;
+}
+
+.buy-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.buy-meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* − 10 + */
+.stepper {
+  height: 46px;
+  border: 1px solid #dfe3eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.stepper:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(30, 95, 192, 0.15);
+}
+
+.stepper-btn {
+  width: 40px;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  display: grid;
+  place-items: center;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: #f3f5f8;
+}
+
+.stepper-btn:first-child { border-radius: 10px 0 0 10px; }
+.stepper-btn:last-child  { border-radius: 0 10px 10px 0; }
+
+.stepper-btn:disabled {
+  color: #b9c0cc;
+}
+
+.stepper-btn .ikonica {
+  width: 17px;
+  height: 17px;
+}
+
+.stepper-input {
+  width: 44px;
+  height: 100%;
+  border: 0;
+  background: none;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.buy-amount {
+  min-width: 128px;
+  text-align: right;
+  font-size: 16px;
+}
+
+/* Pregled kupovine */
+.buy-summary .summary-total {
+  border-bottom: 1px dashed #dfe3eb;
+  padding-bottom: 12px;
+}
+
+.buy-low {
+  color: #c62828;
+  font-size: 14px;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 991.98px) {
+  .buy-panel,
+  .buy-summary {
+    padding: 18px;
+  }
+
+  .buy-row {
+    gap: 12px 14px;
+  }
+
+  .buy-info {
+    flex: 1 1 calc(100% - 64px);
+    min-width: 0;
+  }
+
+  .stepper {
+    margin-left: 60px;
+  }
+
+  .buy-amount {
+    flex: 1;
+    min-width: 0;
+  }
+}
