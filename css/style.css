@@ -642,6 +642,146 @@ form {
   font-size: 12.5px;
 }
 
+/* Krug sa profilnom slikom umesto inicijala */
+.avatar-img {
+  display: block;
+  object-fit: cover;
+}
+
+/* Student: krug i ime vode na profil */
+.user-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.user-link:hover .user-name {
+  color: var(--blue);
+}
+
+a.btn-bell {
+  text-decoration: none;
+}
+
+.btn-bell:hover,
+.btn-bell[aria-expanded="true"] {
+  border-color: #b9c6dd;
+}
+
+/* Broj nepročitanih obaveštenja na zvoncetu ("3+" za više od tri) */
+.bell-count {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #e8832a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* Lista obaveštenja koja se otvara klikom na zvonce */
+.bell-menu {
+  width: min(380px, calc(100vw - 24px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: 0 12px 32px rgba(11, 37, 69, 0.16);
+  overflow: hidden;
+}
+
+.bell-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eceff4;
+  font-size: 15px;
+}
+
+.bell-list {
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+}
+
+.bell-item {
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eceff4;
+}
+
+.bell-item.is-new {
+  background: #fff8f1;
+}
+
+.bell-item .tint-box {
+  flex-shrink: 0;
+}
+
+.bell-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bell-item.is-new .bell-title::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: #e8832a;
+  vertical-align: middle;
+}
+
+.bell-text {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bell-meta {
+  margin: 4px 0 0;
+  color: #7c8496;
+  font-size: 12px;
+}
+
+.bell-empty {
+  padding: 20px 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.bell-all {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.bell-all:hover {
+  background: #f6f8fc;
+}
+
+.bell-all .ikonica {
+  width: 16px;
+  height: 16px;
+}
+
 /* ---------- Kartice (bele, zaobljene) ---------- */
 .stat-card,
 .panel {
@@ -773,6 +913,10 @@ form {
 
 .message:last-child {
   padding-bottom: 0;
+}
+
+.message-title .tag {
+  vertical-align: middle;
 }
 
 .message-title {
@@ -1027,5 +1171,20 @@ form {
   .panel {
     box-shadow: none;
     break-inside: avoid;
+  }
+}
+
+/* Tekst pored ikonice u listi zvonceta sme da se skrati */
+.bell-item > div {
+  min-width: 0;
+}
+
+/* Na telefonu lista zvonceta zauzima celu širinu ekrana, ispod zaglavlja */
+@media (max-width: 575.98px) {
+  .bell-menu {
+    position: fixed !important;
+    inset: 76px 12px auto 12px !important;
+    width: auto;
+    transform: none !important;
   }
 }

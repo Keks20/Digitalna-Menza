@@ -1,6 +1,10 @@
 <?php
 /**
- * LOGIKA: uplate studenata i obaveštenja (samo administrator).
+ * LOGIKA: pregled uplata studenata i obaveštenja (samo administrator).
+ *
+ * Uplate su samo lista (filter i pretraga): administrator ih ne potvrđuje i ne odbija.
+ * IPS uplatu potvrđuje banka (u prototipu simulacija na dopuna_ips.php), a student sam može
+ * da refundira uplatu u roku od sat vremena (refundacija.php).
  * Izgled je u views/admin_uplate.view.php.
  *
  * Adresa: admin_uplate.php                          – sve uplate, nova poruka
@@ -8,8 +12,6 @@
  *         admin_uplate.php?izmeni=4                 – forma popunjena obaveštenjem br. 4
  *
  * Forma šalje POST sa poljem "akcija":
- *   potvrdi  – uplata koja čeka postaje uspešna i novac se dodaje na karticu (polje id)
- *   odbij    – uplata koja čeka se odbija (polje id)
  *   objavi   – novo obaveštenje
  *   izmeni   – izmena postojećeg obaveštenja (polje id)
  *   obrisi   – brisanje obaveštenja (polje id)
@@ -17,12 +19,13 @@
  *
  * Prikaz dobija:
  *   $admin         Admin        prijavljeni administrator
- *   $uplate        array        uplate: ['id', 'kreirano', 'ime', 'prezime', 'broj_kartice', 'nacin', 'iznos', 'status']
+ *   $uplate        array        uplate: ['id', 'kreirano', 'ime', 'prezime', 'broj_kartice', 'nacin', 'iznos', 'status',
+ *                               'refundirano' (datum i vreme kad je student refundirao uplatu, ili null)]
  *   $filterStatus  string       '' (sve) | 'ceka_potvrdu' | 'odbijeno' | 'uspesno'
  *   $pretraga      string       tekst iz polja za pretragu
  *   $FILTERI       array        ['' => 'Sve', 'ceka_potvrdu' => 'Čeka potvrdu', ...] za dugmad filtera
  *   $uplateDanas   array        ['broj' => 47, 'zbir' => 48500.0] uspešne uplate danas
- *   $brojNaCekanju int          koliko uplata čeka potvrdu (za značku)
+ *   $brojNaCekanju int          koliko IPS uplata čeka potvrdu banke (za značku)
  *   adminUplateUrl(status, q)   funkcija – link za filter (zadržava pretragu)
  *   $menze         array        [['id', 'naziv', ...], ...] za izbor menze
  *   $domovi        string[]     ['Dom 1', ...] za izbor doma
@@ -98,20 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$adminAuth->validateCsrfToken($_POST['csrf_token'] ?? '')) {
         Poruka::postavi('danger', 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.');
-        header('Location: ' . $nazad);
-        exit;
-    }
-
-    // ---------- Uplate: potvrda ili odbijanje ----------
-    if ($akcija === 'potvrdi' || $akcija === 'odbij') {
-        $uspelo = $akcija === 'potvrdi' ? $transakcijaRepo->potvrdiUplatu($id) : $transakcijaRepo->odbijUplatu($id);
-        if (!$uspelo) {
-            Poruka::postavi('danger', 'Uplata ne postoji ili više ne čeka potvrdu.');
-        } elseif ($akcija === 'potvrdi') {
-            Poruka::postavi('success', 'Uplata br. ' . $id . ' je potvrđena – novac je dodat na karticu.');
-        } else {
-            Poruka::postavi('success', 'Uplata br. ' . $id . ' je odbijena.');
-        }
         header('Location: ' . $nazad);
         exit;
     }

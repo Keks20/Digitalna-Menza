@@ -93,7 +93,7 @@ $izgledObroka = [
                   <h2 class="meal-name"><?php echo htmlspecialchars($tip->naziv); ?></h2>
                   <p class="meal-hours"><?php echo $tip->radnoVreme(); ?></p>
                 </div>
-                <span class="meal-price"><?php echo Format::cena($tip->cena); ?></span>
+                <span class="meal-price"><?php echo Format::cena($student->cenaObroka($tip->cena)); ?></span>
               </div>
 
               <ul class="dish-list">

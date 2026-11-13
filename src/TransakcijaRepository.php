@@ -8,7 +8,7 @@ require_once __DIR__ . '/Format.php';
  * Evidencija novca.
  *
  * Obični create() samo upisuje red i NE menja stanje kartice. Novac se pomera
- * metodama uplati(), potvrdiUplatu(), kupiObroke() i platiStanarinu(): one u jednoj transakciji baze menjaju
+ * metodama uplati(), potvrdiUplatu(), refundirajUplatu(), kupiObroke() i platiStanarinu(): one u jednoj transakciji baze menjaju
  * stanje kartice i upisuju transakciju, pa stanje i istorija nikad ne mogu da se razilaze.
  */
 class TransakcijaRepository extends BaseRepository
@@ -31,7 +31,7 @@ class TransakcijaRepository extends BaseRepository
     }
 
     /**
-     * Menja se samo status (admin potvrđuje ili odbija IPS uplatu).
+     * Menja se samo status (npr. otkazana IPS uplata postaje 'odbijeno').
      */
     public function update(int $id, array $data)
     {
@@ -70,13 +70,13 @@ class TransakcijaRepository extends BaseRepository
     }
 
     /**
-     * Poslednja uspešna uplata (za karticu "Poslednja uplata" na početnoj).
+     * Poslednja uspešna uplata koja nije refundirana (za karticu "Poslednja uplata" na početnoj).
      */
     public function poslednjaUplata(int $karticaId): ?Transakcija
     {
         $stmt = $this->conn->prepare(
             "SELECT * FROM transakcije
-             WHERE kartica_id = ? AND tip = 'uplata' AND status = 'uspesno'
+             WHERE kartica_id = ? AND tip = 'uplata' AND status = 'uspesno' AND refundirano IS NULL
              ORDER BY kreirano DESC, id DESC LIMIT 1"
         );
         $stmt->bind_param('i', $karticaId);
@@ -133,6 +133,7 @@ class TransakcijaRepository extends BaseRepository
     /**
      * Zbir uspešnih transakcija po tipu u periodu: ['uplata' => 10000.0, 'obroci' => -5320.0, 'smestaj' => -2800.0]
      * Uplate su pozitivne, a obroci i smeštaj negativni (tako su i upisani).
+     * Refundacije se oduzimaju od uplata, pa je 'uplata' ono što je stvarno ostalo na kartici.
      */
     public function zbirPoTipu(int $karticaId, string $od, string $do): array
     {
@@ -149,7 +150,8 @@ class TransakcijaRepository extends BaseRepository
 
         $zbirovi = ['uplata' => 0.0, 'obroci' => 0.0, 'smestaj' => 0.0];
         while ($row = $result->fetch_assoc()) {
-            $zbirovi[$row['tip']] = (float)$row['zbir'];
+            $tip = $row['tip'] === 'refundacija' ? 'uplata' : $row['tip'];
+            $zbirovi[$tip] += (float)$row['zbir'];
         }
         return $zbirovi;
     }
@@ -164,7 +166,10 @@ class TransakcijaRepository extends BaseRepository
         $tipovi = 'i';
         $vrednosti = [$karticaId];
 
-        if (($filter['tip'] ?? '') !== '') {
+        if (($filter['tip'] ?? '') === 'uplata') {
+            // Uz uplate se prikazuju i njihove refundacije
+            $where .= " AND tip IN ('uplata', 'refundacija')";
+        } elseif (($filter['tip'] ?? '') !== '') {
             $where .= ' AND tip = ?';
             $tipovi .= 's';
             $vrednosti[] = $filter['tip'];
@@ -229,7 +234,7 @@ class TransakcijaRepository extends BaseRepository
     }
 
     /**
-     * Potvrda uplate koja čeka (admin ili simulacija prijema IPS uplate):
+     * Potvrda uplate koja čeka (simulacija obaveštenja banke da je IPS uplata stigla):
      * status postaje 'uspesno' i novac se dodaje na karticu.
      * Vraća false ako transakcija ne postoji ili više ne čeka potvrdu.
      */
@@ -275,6 +280,112 @@ class TransakcijaRepository extends BaseRepository
         $stmt->bind_param('i', $id);
         $stmt->execute();
         return $stmt->affected_rows === 1;
+    }
+
+    // =================================================================
+    // Refundacija uplate (student, u roku od sat vremena)
+    // =================================================================
+
+    /** Koliko minuta posle uplate student može da je refundira */
+    public const ROK_REFUNDACIJE_MIN = 60;
+
+    /**
+     * Uslov da uplata t (sa karticom k) može da se refundira; jedan parametar: rok u minutama.
+     * Vreme se poredi sa NOW() iz baze, jer je i kreirano upisala baza.
+     */
+    private const USLOV_REFUNDACIJE = "t.tip = 'uplata' AND t.status = 'uspesno' AND t.refundirano IS NULL
+               AND t.kreirano > NOW() - INTERVAL ? MINUTE
+               AND k.stanje >= t.iznos
+               AND NOT EXISTS (SELECT 1 FROM transakcije p
+                               WHERE p.kartica_id = t.kartica_id AND p.tip IN ('obroci', 'smestaj')
+                                 AND p.status = 'uspesno' AND p.id > t.id)";
+
+    /**
+     * Uplate jedne kartice koje još mogu da se refundiraju: [id uplate => rok, npr. '2026-11-13 15:42:10'].
+     *
+     * Uplata može da se refundira kad su ispunjeni svi uslovi:
+     *   - uspešna je i nije već refundirana,
+     *   - od uplate nije prošlo više od ROK_REFUNDACIJE_MIN minuta,
+     *   - posle nje sa kartice ništa nije plaćeno (obroci, stanarina) – čim se novac potroši, refundacija se gasi,
+     *   - na kartici ima bar toliko novca.
+     */
+    public function refundabilneUplate(int $karticaId): array
+    {
+        $rok = self::ROK_REFUNDACIJE_MIN;
+        $stmt = $this->conn->prepare(
+            "SELECT t.id, DATE_ADD(t.kreirano, INTERVAL ? MINUTE) AS rok
+             FROM transakcije t
+             JOIN kartice k ON k.id = t.kartica_id
+             WHERE t.kartica_id = ? AND " . self::USLOV_REFUNDACIJE
+        );
+        $stmt->bind_param('iii', $rok, $karticaId, $rok);
+        $stmt->execute();
+        return array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'rok', 'id');
+    }
+
+    /**
+     * Refundacija uplate: u jednoj transakciji baze skida iznos uplate sa kartice, upisuje transakciju
+     * tipa 'refundacija' (isti iznos u minusu) i označava uplatu kao refundiranu.
+     * Novac se vraća na isti način na koji je uplaćen (simulacija – nema prave banke).
+     *
+     * Vraća id transakcije refundacije. Baca RuntimeException sa porukom za studenta
+     * kad uplata nije njegova ili više ne ispunjava uslove iz refundabilneUplate().
+     */
+    public function refundirajUplatu(int $karticaId, int $uplataId): int
+    {
+        $this->conn->begin_transaction();
+        try {
+            // Prvo kartica, pa uplata – isti redosled zaključavanja kao kod kupovine i stanarine,
+            // pa kupovina i refundacija istog novca ne mogu da prođu u isto vreme
+            $stmt = $this->conn->prepare('SELECT stanje, status FROM kartice WHERE id = ? FOR UPDATE');
+            $stmt->bind_param('i', $karticaId);
+            $stmt->execute();
+            $kartica = $stmt->get_result()->fetch_assoc();
+            if (!$kartica) {
+                throw new RuntimeException('Kartica ne postoji.');
+            }
+            if ($kartica['status'] !== 'aktivna') {
+                throw new RuntimeException('Kartica je blokirana – obratite se Studentskom centru.');
+            }
+
+            $rok = self::ROK_REFUNDACIJE_MIN;
+            $stmt = $this->conn->prepare(
+                "SELECT t.id, t.iznos, t.nacin, t.kreirano
+                 FROM transakcije t
+                 JOIN kartice k ON k.id = t.kartica_id
+                 WHERE t.id = ? AND t.kartica_id = ? AND " . self::USLOV_REFUNDACIJE . "
+                 FOR UPDATE"
+            );
+            $stmt->bind_param('iii', $uplataId, $karticaId, $rok);
+            $stmt->execute();
+            $uplata = $stmt->get_result()->fetch_assoc();
+            if (!$uplata) {
+                throw new RuntimeException('Ova uplata ne može da se refundira – prošao je rok od '
+                    . self::ROK_REFUNDACIJE_MIN . ' minuta ili je novac sa kartice već potrošen.');
+            }
+
+            $iznos = (float)$uplata['iznos'];
+            $novoStanje = $this->dodajNaStanje($karticaId, -$iznos);
+
+            $tip = 'refundacija';
+            $status = 'uspesno';
+            $iznosTransakcije = -$iznos;
+            $opis = 'Refundacija uplate ' . Format::brojTransakcije((int)$uplata['id'], $uplata['kreirano']);
+            $stmt = $this->conn->prepare('INSERT INTO transakcije (kartica_id, tip, nacin, iznos, stanje_posle, status, opis) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt->bind_param('issddss', $karticaId, $tip, $uplata['nacin'], $iznosTransakcije, $novoStanje, $status, $opis);
+            $stmt->execute();
+            $refundacijaId = $this->conn->insert_id;
+
+            $stmt = $this->conn->prepare('UPDATE transakcije SET refundirano = NOW() WHERE id = ?');
+            $stmt->bind_param('i', $uplataId);
+            $stmt->execute();
+
+            $this->conn->commit();
+            return $refundacijaId;
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            throw $e;
+        }
     }
 
     /**
@@ -327,14 +438,14 @@ class TransakcijaRepository extends BaseRepository
     }
 
     /**
-     * Broj i zbir uspešnih uplata za jedan dan: ['broj' => 47, 'zbir' => 48500.0]
+     * Broj i zbir uspešnih uplata za jedan dan (bez refundiranih): ['broj' => 47, 'zbir' => 48500.0]
      */
     public function uplateZaDan(string $datum): array
     {
         $stmt = $this->conn->prepare(
             "SELECT COUNT(*) AS broj, COALESCE(SUM(iznos), 0) AS zbir
              FROM transakcije
-             WHERE tip = 'uplata' AND status = 'uspesno' AND DATE(kreirano) = ?"
+             WHERE tip = 'uplata' AND status = 'uspesno' AND refundirano IS NULL AND DATE(kreirano) = ?"
         );
         $stmt->bind_param('s', $datum);
         $stmt->execute();
@@ -342,7 +453,7 @@ class TransakcijaRepository extends BaseRepository
         return ['broj' => (int)$row['broj'], 'zbir' => (float)$row['zbir']];
     }
 
-    /** Koliko uplata čeka potvrdu administratora */
+    /** Koliko IPS uplata još čeka potvrdu banke */
     public function brojUplataNaCekanju(): int
     {
         $result = $this->conn->query("SELECT COUNT(*) AS broj FROM transakcije WHERE tip = 'uplata' AND status = 'ceka_potvrdu'");

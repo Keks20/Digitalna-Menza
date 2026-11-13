@@ -30,6 +30,16 @@
   opacity: 0.6;
 }
 
+/* Obrok na koji kategorija studenta nema pravo (npr. doručak za studente iz Kragujevca) */
+.buy-row.is-locked .stepper,
+.buy-row.is-locked .buy-amount {
+  display: none !important;
+}
+
+.buy-category strong {
+  color: var(--text);
+}
+
 .buy-info {
   flex: 1 1 0;
   min-width: 160px;

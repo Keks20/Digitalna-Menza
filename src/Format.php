@@ -133,6 +133,7 @@ class Format
             'uplata' => 'Uplata',
             'obroci' => 'Obroci',
             'smestaj' => 'Smeštaj',
+            'refundacija' => 'Refundacija',
         ];
         return $nazivi[$tip] ?? $tip;
     }

@@ -20,6 +20,21 @@ class StudentRepository extends BaseRepository
         return $this->conn->insert_id;
     }
 
+    /**
+     * Student sa podatkom da li je u studentskom domu (u_domu = ima aktivan ugovor) – od toga zavisi kategorija.
+     */
+    public function read(int $id)
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT s.*, EXISTS(SELECT 1 FROM smestaj_ugovori u WHERE u.student_id = s.id AND u.aktivan = 1) AS u_domu
+             FROM studenti s WHERE s.id = ?'
+        );
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        return $row ? $this->mapRow($row) : null;
+    }
+
     public function update(int $id, array $data)
     {
         $stmt = $this->conn->prepare('UPDATE studenti SET ime = ?, prezime = ?, broj_indeksa = ?, ustanova = ?, email = ? WHERE id = ?');
@@ -34,6 +49,54 @@ class StudentRepository extends BaseRepository
     }
 
     // =================================================================
+    // Profil: kontakt podaci, profilna slika, pročitana obaveštenja
+    // =================================================================
+
+    /** Da li neki DRUGI student već koristi ovu e-adresu */
+    public function emailZauzet(string $email, int $osimStudentaId): bool
+    {
+        $stmt = $this->conn->prepare('SELECT 1 FROM studenti WHERE email = ? AND id <> ? LIMIT 1');
+        $stmt->bind_param('si', $email, $osimStudentaId);
+        $stmt->execute();
+        return (bool)$stmt->get_result()->fetch_row();
+    }
+
+    /** E-adresa i telefon iz profila ($telefon = null briše broj) */
+    public function promeniKontakt(int $id, string $email, ?string $telefon): bool
+    {
+        $stmt = $this->conn->prepare('UPDATE studenti SET email = ?, telefon = ? WHERE id = ?');
+        $stmt->bind_param('ssi', $email, $telefon, $id);
+        return $stmt->execute();
+    }
+
+    /** Naziv fajla profilne slike (null = bez slike) */
+    public function postaviSliku(int $id, ?string $slika): bool
+    {
+        $stmt = $this->conn->prepare('UPDATE studenti SET slika = ? WHERE id = ?');
+        $stmt->bind_param('si', $slika, $id);
+        return $stmt->execute();
+    }
+
+    /** Student je otvorio zvonce: sva dosadašnja obaveštenja se računaju kao pročitana */
+    public function oznaciObavestenjaProcitanim(int $id): bool
+    {
+        $stmt = $this->conn->prepare('UPDATE studenti SET obavestenja_procitana = NOW() WHERE id = ?');
+        $stmt->bind_param('i', $id);
+        return $stmt->execute();
+    }
+
+    /** Kategorija studenta (admin "Studenti"); vrednosti moraju biti iz Student::FINANSIRANJA i Student::PREBIVALISTA */
+    public function postaviKategoriju(int $id, string $finansiranje, string $prebivaliste): bool
+    {
+        if (!isset(Student::FINANSIRANJA[$finansiranje]) || !isset(Student::PREBIVALISTA[$prebivaliste])) {
+            throw new InvalidArgumentException('Nepoznata kategorija studenta.');
+        }
+        $stmt = $this->conn->prepare('UPDATE studenti SET finansiranje = ?, prebivaliste = ? WHERE id = ?');
+        $stmt->bind_param('ssi', $finansiranje, $prebivaliste, $id);
+        return $stmt->execute();
+    }
+
+    // =================================================================
     // Admin "Studenti": pretraga studenata sa njihovim karticama
     // =================================================================
 
@@ -41,7 +104,7 @@ class StudentRepository extends BaseRepository
      * Studenti sa karticom, po prezimenu i imenu.
      * Uslovi: ['q' => ime, prezime, broj indeksa ili broj kartice (sa razmacima ili bez),
      *          'status' => '' | 'aktivna' | 'blokirana', 'limit' => 20, 'offset' => 0]
-     * Vraća [['id', 'ime', 'prezime', 'broj_indeksa', 'ustanova', 'email',
+     * Vraća [['id', 'ime', 'prezime', 'broj_indeksa', 'ustanova', 'email', 'finansiranje', 'prebivaliste', 'u_domu',
      *         'kartica_id', 'broj_kartice', 'stanje', 'status'], ...]
      */
     public function pretraga(array $uslovi = []): array
@@ -51,7 +114,8 @@ class StudentRepository extends BaseRepository
         $offset = (int)($uslovi['offset'] ?? 0);
 
         $stmt = $this->conn->prepare(
-            "SELECT s.id, s.ime, s.prezime, s.broj_indeksa, s.ustanova, s.email,
+            "SELECT s.id, s.ime, s.prezime, s.broj_indeksa, s.ustanova, s.email, s.finansiranje, s.prebivaliste,
+                    EXISTS(SELECT 1 FROM smestaj_ugovori u WHERE u.student_id = s.id AND u.aktivan = 1) AS u_domu,
                     k.id AS kartica_id, k.broj_kartice, k.stanje, k.status
              FROM studenti s
              JOIN kartice k ON k.student_id = s.id

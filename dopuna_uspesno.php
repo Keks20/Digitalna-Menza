@@ -13,6 +13,12 @@
  *   $brojTransakcije   string        npr. "TX-2026-11-000123"
  *   $prethodnoStanje   float|null    stanje pre uplate (null dok uplata nije uspešna)
  *   $novoStanje        float|null    stanje posle uplate (null dok uplata nije uspešna)
+ *   $rokRefundacije    string|null   do kada uplata može da se refundira, npr. '15:42' (null = ne može)
+ *   $rokMinuta         int           koliko minuta posle uplate važi refundacija (60)
+ *   $poruka            array|null    ['tip' => 'success'|'danger', 'tekst' => '...']
+ *   $csrfToken         string        za formu refundacije: POST na refundacija.php (id, nazad=dopuna, csrf_token)
+ *
+ * Refundirana uplata ($uplata->refundirano nije null) se prikazuje kao "Uplata je refundirana".
  */
 require_once __DIR__ . '/includes/provera_prijave.php';
 require_once __DIR__ . '/src/StudentRepository.php';
@@ -46,5 +52,11 @@ $student = (new StudentRepository())->read($studentId);
 $brojTransakcije = Format::brojTransakcije((int)$uplata->id, $uplata->kreirano);
 $novoStanje = $uplata->status === 'uspesno' ? $uplata->stanje_posle : null;
 $prethodnoStanje = $novoStanje !== null ? $novoStanje - $uplata->iznos : null;
+
+$refundabilne = (new TransakcijaRepository())->refundabilneUplate($karticaId);
+$rokRefundacije = isset($refundabilne[$uplata->id]) ? date('H:i', strtotime($refundabilne[$uplata->id])) : null;
+$rokMinuta = TransakcijaRepository::ROK_REFUNDACIJE_MIN;
+$poruka = Poruka::uzmi();
+$csrfToken = $auth->generateCsrfToken();
 
 require __DIR__ . '/views/dopuna_uspesno.view.php';

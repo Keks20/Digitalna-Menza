@@ -270,3 +270,20 @@
     flex: 1 1 100%;
   }
 }
+
+/* Refundacija na potvrdi uplate */
+.refund-box {
+  padding-top: 20px;
+  border-top: 1px solid #eceff4;
+}
+
+.btn-refund {
+  --bs-btn-color: #a85a12;
+  --bs-btn-border-color: #f0c9a3;
+  --bs-btn-hover-color: #a85a12;
+  --bs-btn-hover-bg: #fff6ec;
+  --bs-btn-hover-border-color: #e8832a;
+  --bs-btn-active-color: #a85a12;
+  --bs-btn-active-bg: #fdebd8;
+  --bs-btn-active-border-color: #e8832a;
+}

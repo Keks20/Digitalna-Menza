@@ -16,7 +16,7 @@ require __DIR__ . '/delovi/admin_meni.php';
 $sekcije = [
     ['fajl' => 'admin_jelovnik.php', 'naziv' => 'Jelovnik i cene',      'opis' => 'Unos jelovnika po danu i menzi, nacrt i objava, cene obroka.', 'ikonica' => 'kalendar', 'boja' => 'tint-blue'],
     ['fajl' => 'kasir_bonovi.php',   'naziv' => 'Provera bonova',       'opis' => 'Provera QR bona studenta i izdavanje obroka na kasi.',          'ikonica' => 'qr',       'boja' => 'tint-orange'],
-    ['fajl' => 'admin_uplate.php',   'naziv' => 'Uplate i obaveštenja', 'opis' => 'Potvrda IPS uplata i slanje obaveštenja studentima.',          'ikonica' => 'novac',    'boja' => 'tint-green'],
+    ['fajl' => 'admin_uplate.php',   'naziv' => 'Uplate i obaveštenja', 'opis' => 'Pregled uplata i slanje obaveštenja studentima.',            'ikonica' => 'novac',    'boja' => 'tint-green'],
     ['fajl' => 'admin_smestaj.php',  'naziv' => 'Smeštaj',              'opis' => 'Ugovori o smeštaju i mesečna zaduženja za stanarinu.',          'ikonica' => 'kuca',     'boja' => 'tint-blue'],
     ['fajl' => 'admin_studenti.php', 'naziv' => 'Studenti',             'opis' => 'Pregled studenata, kartica i stanja.',                          'ikonica' => 'studenti', 'boja' => 'tint-green'],
 ];

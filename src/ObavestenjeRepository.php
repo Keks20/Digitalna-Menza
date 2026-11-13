@@ -7,6 +7,14 @@ class ObavestenjeRepository extends BaseRepository
 {
     protected $table = 'obavestenja';
 
+    /** Koja obaveštenja vidi student (jedan parametar: id studenta); koristi se u zaStudenta() i brojNeprocitanih() */
+    private const USLOV_ZA_STUDENTA = "o.ciljna_grupa IN ('svi', 'menza')
+                OR (o.ciljna_grupa = 'dom' AND o.dom IN (
+                       SELECT s.dom
+                       FROM smestaj_ugovori u
+                       JOIN sobe s ON s.id = u.soba_id
+                       WHERE u.student_id = ? AND u.aktivan = 1))";
+
     protected function mapRow(array $row)
     {
         return new Obavestenje($row);
@@ -64,21 +72,34 @@ class ObavestenjeRepository extends BaseRepository
      */
     public function zaStudenta(int $studentId, int $limit = 20): array
     {
+        // novo = 1 za obaveštenja objavljena posle poslednjeg otvaranja zvonceta
         $stmt = $this->conn->prepare(
-            "SELECT o.*, m.naziv AS menza
+            "SELECT o.*, m.naziv AS menza,
+                    (st.obavestenja_procitana IS NULL OR o.kreirano > st.obavestenja_procitana) AS novo
              FROM obavestenja o
+             JOIN studenti st ON st.id = ?
              LEFT JOIN menze m ON m.id = o.menza_id
-             WHERE o.ciljna_grupa IN ('svi', 'menza')
-                OR (o.ciljna_grupa = 'dom' AND o.dom IN (
-                       SELECT s.dom
-                       FROM smestaj_ugovori u
-                       JOIN sobe s ON s.id = u.soba_id
-                       WHERE u.student_id = ? AND u.aktivan = 1))
+             WHERE " . self::USLOV_ZA_STUDENTA . "
              ORDER BY o.kreirano DESC, o.id DESC
              LIMIT ?"
         );
-        $stmt->bind_param('ii', $studentId, $limit);
+        $stmt->bind_param('iii', $studentId, $studentId, $limit);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /** Koliko obaveštenja student još nije video (broj na zvoncetu) */
+    public function brojNeprocitanih(int $studentId): int
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) AS broj
+             FROM obavestenja o
+             JOIN studenti st ON st.id = ?
+             WHERE (st.obavestenja_procitana IS NULL OR o.kreirano > st.obavestenja_procitana)
+               AND (" . self::USLOV_ZA_STUDENTA . ")"
+        );
+        $stmt->bind_param('ii', $studentId, $studentId);
+        $stmt->execute();
+        return (int)$stmt->get_result()->fetch_assoc()['broj'];
     }
 }

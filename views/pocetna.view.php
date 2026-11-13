@@ -10,7 +10,6 @@ $aktivnaStrana = 'pocetna.php';
 $stilovi = ['css/pocetna.css'];
 require __DIR__ . '/delovi/zaglavlje.php';
 require __DIR__ . '/delovi/meni.php';
-require_once __DIR__ . '/delovi/obavestenja_izgled.php';
 
 /** Link ka stranici ako već postoji, inače '#' (da dugme ne vodi na grešku 404). */
 function linkKa(string $fajl): string
@@ -43,7 +42,7 @@ $izgledObroka = [
         <p class="page-date"><?php echo Format::danSaDatumom($danas); ?></p>
       </div>
 
-      <?php $imaObavestenja = !empty($poruke); require __DIR__ . '/delovi/korisnik.php'; ?>
+      <?php require __DIR__ . '/delovi/korisnik.php'; ?>
     </header>
 
     <!-- RED 1: kartica sa stanjem + tri male kartice -->
@@ -201,33 +200,6 @@ $izgledObroka = [
         </section>
       </div>
     </div>
-
-    <!-- RED 3: poruke studentima -->
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Poruke studentima</h2>
-        <a href="<?php echo linkKa('obavestenja.php'); ?>" class="panel-link">Sve poruke <?php echo ikonica('desno'); ?></a>
-      </div>
-
-      <?php foreach ($poruke as $poruka): ?>
-        <?php $izgled = izgledObavestenja($poruka); ?>
-        <article class="message d-flex">
-          <span class="tint-box <?php echo $izgled['boja']; ?>"><?php echo ikonica($izgled['ikonica']); ?></span>
-          <div>
-            <h3 class="message-title"><?php echo htmlspecialchars($poruka['naslov']); ?></h3>
-            <p class="message-text"><?php echo htmlspecialchars($poruka['tekst']); ?></p>
-            <p class="message-meta">
-              <?php echo Format::datum($poruka['kreirano']); ?> ·
-              <?php echo htmlspecialchars($izgled['kome']); ?>
-            </p>
-          </div>
-        </article>
-      <?php endforeach; ?>
-
-      <?php if (empty($poruke)): ?>
-        <p class="meal-empty mb-0">Trenutno nema novih poruka.</p>
-      <?php endif; ?>
-    </section>
 
   </main>
 <?php require __DIR__ . '/delovi/podnozje.php'; ?>

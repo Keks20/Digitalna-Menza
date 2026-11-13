@@ -14,7 +14,8 @@
  *   $ponudjeniIznosi   int[]        [500, 1000, 2000, 3000, 5000]
  *   $najmanjiIznos, $najveciIznos  int  granice za "Drugi iznos"
  *   $forma             array        ['iznos' => 2000 | 'drugi', 'drugi_iznos' => '', 'nacin' => 'platna_kartica']
- *   $poslednjeUplate   array        2 poslednje uplate: iznos, nacin, status, kreirano
+ *   $poslednjeUplate   array        2 poslednje uplate: id, iznos, nacin, status, kreirano, refundirano (null = nije refundirana)
+ *   $refundabilne      array        [id uplate => rok '2026-11-13 15:42:10'] – uplate koje još mogu da se refundiraju
  *   $greske            string[]
  *   $poruka            array|null   npr. posle odustajanja od plaćanja
  *   $csrfToken         string
@@ -70,7 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$poslednjeUplate = (new TransakcijaRepository())->list(['kartica_id' => $karticaId, 'tip' => 'uplata', 'limit' => 2]);
+$transakcijaRepo = new TransakcijaRepository();
+$poslednjeUplate = $transakcijaRepo->list(['kartica_id' => $karticaId, 'tip' => 'uplata', 'limit' => 2]);
+$refundabilne = $transakcijaRepo->refundabilneUplate($karticaId);
 $poruka = Poruka::uzmi();
 $csrfToken = $auth->generateCsrfToken();
 

@@ -15,7 +15,8 @@
  *   $menze            array             [['id', 'naziv', 'adresa', ...], ...]
  *   $tipoviObroka     TipObroka[]       doručak, ručak, večera (naziv, cena, radnoVreme())
  *   $jelovnikDanas    array             [menza_id => [tip_obroka_id => [StavkaJelovnika, ...]]]
- *   $poruke           array             poslednja 3 obaveštenja za ovog studenta: naslov, tekst, kreirano, menza_id, menza
+ *
+ * Obaveštenja se više ne prikazuju na početnoj – otvaraju se klikom na zvonce (views/delovi/korisnik.php).
  */
 require_once __DIR__ . '/includes/provera_prijave.php';
 require_once __DIR__ . '/src/StudentRepository.php';
@@ -26,7 +27,6 @@ require_once __DIR__ . '/src/SmestajRepository.php';
 require_once __DIR__ . '/src/MenzaRepository.php';
 require_once __DIR__ . '/src/TipObrokaRepository.php';
 require_once __DIR__ . '/src/JelovnikRepository.php';
-require_once __DIR__ . '/src/ObavestenjeRepository.php';
 require_once __DIR__ . '/src/Format.php';
 
 $danas = date('Y-m-d');
@@ -39,7 +39,6 @@ $obroci = (new KupljeniObrokRepository())->stanjeZaMesec($karticaId, $tekuciMese
 $stanarina = (new SmestajRepository())->tekuceZaduzenje($studentId);
 $menze = (new MenzaRepository())->list();
 $tipoviObroka = (new TipObrokaRepository())->list();
-$poruke = (new ObavestenjeRepository())->zaStudenta($studentId, 3);
 
 $preostaloUkupno = array_sum(array_column($obroci, 'preostalo'));
 

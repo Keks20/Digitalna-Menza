@@ -4,8 +4,8 @@
  * Izgled je u views/dopuna_ips.view.php.
  *
  * Pri prvom otvaranju upisuje se uplata sa statusom 'ceka_potvrdu' (stanje se još ne menja).
- * Novac stiže na karticu kad uplatu potvrdi administrator (admin_uplate.php)
- * ili kad se klikne "Simuliraj prijem uplate" (zamena za obaveštenje banke u test režimu).
+ * Novac stiže na karticu kad banka javi da je uplata stigla – u prototipu je to dugme
+ * "Simuliraj prijem uplate". Administrator uplate samo vidi u listi (admin_uplate.php), ne potvrđuje ih.
  *
  * POST "akcija":
  *   simuliraj  – potvrđuje uplatu -> dopuna_uspesno.php?id=...
@@ -47,7 +47,7 @@ if ($transakcijaId === 0) {
     Dopuna::postaviTransakciju($transakcijaId);
 }
 
-// Ako je administrator u međuvremenu potvrdio ili odbio uplatu, dopuna je završena
+// Ako uplata u međuvremenu više ne čeka (potvrđena ili otkazana u drugoj kartici pregledača), dopuna je završena
 $uplata = $transakcije->read($transakcijaId);
 if (!$uplata || (int)$uplata->kartica_id !== $karticaId || $uplata->status !== 'ceka_potvrdu') {
     Dopuna::zavrsi();
