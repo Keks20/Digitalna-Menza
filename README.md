@@ -99,11 +99,6 @@ config.php               podešavanja baze (config.sample.php / config.local.php
 Svaka tabela ima model (npr. `Kartica`) i repozitorijum (npr. `KarticaRepository`) koji nasleđuje
 apstraktni `BaseRepository`, a on implementira `CrudInterface` (create, read, update, delete, list).
 
-| Ko | Menja |
-| --- | --- |
-| Backend (Luka) | `src/`, `db/`, `includes/`, stranice u korenu (`pocetna.php`…) |
-| Frontend (kolega) | `views/`, `css/`, `js/` |
-
 ## Nova stranica
 
 **1. Logika** – npr. `jelovnik.php` u korenu. Na vrhu je komentar sa spiskom promenljivih koje prikaz dobija:
