@@ -10,6 +10,9 @@ USE menza_db;
 
 -- ---------- Korisnici ----------
 
+-- Kategorija studenta određuje cene i koje obroke sme da kupi:
+--   finansiranje: budžet = osnovna cena obroka, samofinansiranje = trostruka cena
+--   prebivaliste: ko živi u Kragujevcu (a nije u studentskom domu) kupuje samo ručak
 CREATE TABLE studenti (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   ime VARCHAR(50) NOT NULL,
@@ -17,6 +20,11 @@ CREATE TABLE studenti (
   broj_indeksa VARCHAR(20) NOT NULL,
   ustanova VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL UNIQUE,
+  telefon VARCHAR(20) NULL,
+  slika VARCHAR(100) NULL COMMENT 'naziv fajla profilne slike u uploads/profilne/',
+  finansiranje ENUM('budzet','samofinansiranje') NOT NULL DEFAULT 'budzet',
+  prebivaliste ENUM('van_kragujevca','kragujevac') NOT NULL DEFAULT 'van_kragujevca',
+  obavestenja_procitana DATETIME NULL COMMENT 'do kog trenutka je student video obaveštenja (zvonce)',
   kreirano DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_studenti_indeks (ustanova, broj_indeksa)
 ) ENGINE=InnoDB;
@@ -82,17 +90,19 @@ CREATE TABLE jelovnik (
 
 -- ---------- Novac ----------
 
--- Svaka promena stanja kartice. iznos je + za uplatu, - za obroke i smeštaj.
+-- Svaka promena stanja kartice. iznos je + za uplatu, - za obroke, smeštaj i refundaciju uplate.
 -- Na stanje utiču samo transakcije sa statusom 'uspesno'.
+-- refundirano: kada je uplata vraćena studentu (tada postoji i red tipa 'refundacija' sa istim iznosom u minusu).
 CREATE TABLE transakcije (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   kartica_id INT UNSIGNED NOT NULL,
-  tip ENUM('uplata','obroci','smestaj') NOT NULL,
+  tip ENUM('uplata','obroci','smestaj','refundacija') NOT NULL,
   nacin ENUM('platna_kartica','ips_qr','kartica') NOT NULL,
   iznos DECIMAL(10,2) NOT NULL,
   stanje_posle DECIMAL(10,2) NULL,
   status ENUM('uspesno','ceka_potvrdu','odbijeno') NOT NULL DEFAULT 'uspesno',
   opis VARCHAR(255) NOT NULL,
+  refundirano DATETIME NULL,
   kreirano DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_transakcije_kartica FOREIGN KEY (kartica_id) REFERENCES kartice(id),
   INDEX idx_transakcije_kartica (kartica_id, kreirano)

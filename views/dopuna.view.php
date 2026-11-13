@@ -127,15 +127,23 @@ $naciniPlacanja = [
               <p class="message-text mb-0">Još nema uplata.</p>
             <?php endif; ?>
             <?php foreach ($poslednjeUplate as $u): ?>
-              <?php $uspesna = $u['status'] === 'uspesno'; ?>
+              <?php
+                $refundirana = !empty($u['refundirano']);
+                $uspesna = $u['status'] === 'uspesno' && !$refundirana;
+              ?>
               <div class="recent-payment d-flex align-items-center gap-3">
                 <span class="tint-box <?php echo $uspesna ? 'tint-green' : 'tint-orange'; ?>"><?php echo ikonica('uplata'); ?></span>
                 <div class="flex-fill">
                   <div class="recent-amount<?php echo $uspesna ? '' : ' text-muted'; ?>"><?php echo Format::novac($u['iznos'], true); ?></div>
                   <div class="recent-meta"><?php echo Format::datum($u['kreirano']); ?> · <?php echo Format::nacinPlacanja($u['nacin']); ?></div>
                 </div>
-                <?php if (!$uspesna): ?>
+                <?php if ($refundirana): ?>
+                  <span class="tag tag-gray">Refundirano</span>
+                <?php elseif (!$uspesna): ?>
                   <span class="tag <?php echo $u['status'] === 'odbijeno' ? 'tag-red' : 'tag-orange'; ?>"><?php echo Format::statusTransakcije($u['status']); ?></span>
+                <?php elseif (isset($refundabilne[$u['id']])): ?>
+                  <a href="dopuna_uspesno.php?id=<?php echo (int)$u['id']; ?>" class="panel-link"
+                     title="Refundacija je moguća do <?php echo date('H:i', strtotime($refundabilne[$u['id']])); ?>">Refundiraj</a>
                 <?php endif; ?>
               </div>
             <?php endforeach; ?>

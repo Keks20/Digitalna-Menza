@@ -2,7 +2,7 @@
 /**
  * PRIKAZ: uplate i obaveštenja (izgled po Figmi – ekran "Admin-uplate").
  *
- * Levo: uplate studenata – filter po statusu, pretraga i potvrda IPS uplata koje čekaju.
+ * Levo: uplate studenata – samo pregled (filter po statusu i pretraga), bez potvrde i odbijanja.
  * Desno: novo obaveštenje / izmena i lista objavljenih.
  * Spisak promenljivih i imena polja forme su na vrhu admin_uplate.php.
  * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
@@ -214,9 +214,10 @@ $KRATAK_NACIN = [
             <?php foreach ($uplate as $u): ?>
               <?php
                 $kada = strtotime($u['kreirano']);
-                $bojaStatusa = $BOJE_STATUSA[$u['status']] ?? 'tag-gray';
+                $refundirana = !empty($u['refundirano']);
+                $bojaStatusa = $refundirana ? 'tag-gray' : ($BOJE_STATUSA[$u['status']] ?? 'tag-gray');
               ?>
-              <article class="payment-row<?php echo $u['status'] === 'ceka_potvrdu' ? ' is-pending' : ''; ?>"
+              <article class="payment-row"
                        title="<?php echo Format::brojTransakcije((int)$u['id'], $u['kreirano']); ?>">
                 <div class="pay-time">
                   <span class="pay-clock"><?php echo date('H:i', $kada); ?></span>
@@ -231,30 +232,8 @@ $KRATAK_NACIN = [
                 </div>
                 <div class="pay-method d-none d-md-block"><?php echo $KRATAK_NACIN[$u['nacin']] ?? Format::nacinPlacanja($u['nacin']); ?></div>
                 <div class="pay-amount"><?php echo Format::novac($u['iznos']); ?></div>
-                <div class="pay-status"><span class="tag ms-0 <?php echo $bojaStatusa; ?>"><?php echo Format::statusTransakcije($u['status']); ?></span></div>
+                <div class="pay-status"><span class="tag ms-0 <?php echo $bojaStatusa; ?>"><?php echo $refundirana ? 'Refundirano' : Format::statusTransakcije($u['status']); ?></span></div>
 
-                <?php if ($u['status'] === 'ceka_potvrdu'): ?>
-                  <!-- IPS uplata čeka: admin potvrđuje kad novac stigne na račun -->
-                  <div class="pay-actions d-flex flex-wrap align-items-center gap-2">
-                    <span class="pay-tx"><?php echo Format::brojTransakcije((int)$u['id'], $u['kreirano']); ?></span>
-                    <form method="post" action="admin_uplate.php">
-                      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
-                      <input type="hidden" name="akcija" value="potvrdi" />
-                      <input type="hidden" name="id" value="<?php echo (int)$u['id']; ?>" />
-                      <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
-                      <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($pretraga); ?>" />
-                      <button type="submit" class="btn-pay btn-pay-ok"><?php echo ikonica('kvacica'); ?> Potvrdi uplatu</button>
-                    </form>
-                    <form method="post" action="admin_uplate.php" onsubmit="return confirm('Odbiti ovu uplatu? Novac neće biti dodat na karticu.');">
-                      <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
-                      <input type="hidden" name="akcija" value="odbij" />
-                      <input type="hidden" name="id" value="<?php echo (int)$u['id']; ?>" />
-                      <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
-                      <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($pretraga); ?>" />
-                      <button type="submit" class="btn-pay btn-pay-no">Odbij</button>
-                    </form>
-                  </div>
-                <?php endif; ?>
               </article>
             <?php endforeach; ?>
           <?php endif; ?>
@@ -263,6 +242,7 @@ $KRATAK_NACIN = [
             <?php if (count($uplate) >= BROJ_UPLATA): ?>
               Prikazano je poslednjih <?php echo BROJ_UPLATA; ?> uplata – za starije koristi pretragu.<br />
             <?php endif; ?>
+            Uplate su samo za pregled – IPS uplatu potvrđuje banka, a student može da refundira uplatu u roku od sat vremena.<br />
             Danas: <strong><?php echo $uplateDanas['broj']; ?> uspešnih uplata</strong> · <?php echo Format::novac($uplateDanas['zbir']); ?>
           </p>
         </section>

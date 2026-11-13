@@ -93,3 +93,52 @@
     border-radius: 10px;
   }
 }
+
+/* Kategorija studenta ispod ustanove: dugme koje otvara prozor za izmenu */
+.st-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  margin-top: 5px;
+  padding: 3px 9px;
+  border: 1px solid #d6e3f8;
+  border-radius: 9px;
+  background: #f1f6fd;
+  color: var(--blue-dark);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.st-category:hover {
+  border-color: var(--blue);
+}
+
+.st-category:focus-visible {
+  outline: 2px solid rgba(30, 95, 192, 0.4);
+  outline-offset: 2px;
+}
+
+.st-category .ikonica {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+.category-modal {
+  border: 0;
+  border-radius: var(--card-radius);
+}
+
+.category-modal .modal-header,
+.category-modal .modal-footer {
+  border-color: #eceff4;
+}
+
+.category-modal .modal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}

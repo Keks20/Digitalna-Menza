@@ -9,17 +9,25 @@
  * Forma šalje POST: akcija=kupi, mesec, kolicina[<id tipa obroka>] (0 = taj obrok se ne kupuje), csrf_token.
  * Posle uspešne kupovine preusmerava na obroci.php (Moji obroci) sa porukom.
  *
+ * Kategorija studenta (src/Student.php) određuje šta i po kojoj ceni može da kupi:
+ *   – samofinansirajući studenti plaćaju trostruku cenu obroka,
+ *   – studenti koji žive u Kragujevcu (a nisu u domu) mogu da kupe samo ručak.
+ * Cena se uvek računa na serveru iz osnovne cene u bazi i kategorije studenta.
+ *
  * Ograničenje: najviše jedan obrok svake vrste po danu. Za tekući mesec to znači
  * najviše onoliko koliko je ostalo dana (računajući danas), umanjeno za već kupljene a neiskorišćene.
  *
  * Prikaz dobija:
- *   $student      Student
+ *   $student      Student         nazivKategorije(), opisKategorije(), samoRucak(), jeSamofinansirajuci()
  *   $kartica      Kartica         stanje, formatiranBroj()
  *   $meseci       array           [['datum' => '2026-11-01', 'naziv' => 'Novembar 2026', 'vazi_do' => '30.11.2026.'], ...] (tekući i sledeći)
  *   $mesec        string          izabrani mesec, 'Y-m-01'
  *   $nazivMeseca  string          npr. 'Novembar 2026'
  *   $vaziDo       string          npr. '30.11.2026.'
- *   $obroci       array           po tipu obroka: [['tip' => TipObroka, 'kupljeno' => 10, 'preostalo' => 7, 'maks' => 18], ...]
+ *   $obroci       array           po tipu obroka: [['tip' => TipObroka, 'cena' => 120.0, 'dozvoljen' => true,
+ *                                 'kupljeno' => 10, 'preostalo' => 7, 'maks' => 18], ...]
+ *                                 cena = cena jednog obroka za ovog studenta (ne osnovna cena iz tipa)
+ *                                 dozvoljen = false kad kategorija studenta nema pravo na taj obrok (tada je maks = 0)
  *                                 maks = koliko još sme da se kupi za izabrani mesec
  *   $forma        array           ['kolicine' => [tip_id => broj]] – broj u polju (posle greške ostaje uneto)
  *   $menze        array           [['id', 'naziv', ...], ...] (za napomenu gde važe obroci)
@@ -70,16 +78,19 @@ $danaUMesecu = (int)date('t', strtotime($mesec));
 $ostaloDana = $mesec === $tekuci ? $danaUMesecu - (int)date('j') + 1 : $danaUMesecu;
 
 /** Po tipu obroka: kupljeno, preostalo i koliko još sme da se kupi */
-function obrociZaKupovinu(array $tipovi, array $stanje, int $danaUMesecu, int $ostaloDana): array
+function obrociZaKupovinu(Student $student, array $tipovi, array $stanje, int $danaUMesecu, int $ostaloDana): array
 {
     $poTipu = array_column($stanje, null, 'tip_obroka_id');
     $obroci = [];
     foreach ($tipovi as $tip) {
         $kupljeno = (int)($poTipu[$tip->id]['kupljeno'] ?? 0);
         $preostalo = (int)($poTipu[$tip->id]['preostalo'] ?? 0);
-        $maks = min($danaUMesecu - $kupljeno, $ostaloDana - $preostalo);
+        $dozvoljen = $student->smeDaKupi((int)$tip->id);
+        $maks = $dozvoljen ? min($danaUMesecu - $kupljeno, $ostaloDana - $preostalo) : 0;
         $obroci[$tip->id] = [
             'tip' => $tip,
+            'cena' => $student->cenaObroka($tip->cena),
+            'dozvoljen' => $dozvoljen,
             'kupljeno' => $kupljeno,
             'preostalo' => $preostalo,
             'maks' => max(0, $maks),
@@ -88,7 +99,7 @@ function obrociZaKupovinu(array $tipovi, array $stanje, int $danaUMesecu, int $o
     return $obroci;
 }
 
-$obroci = obrociZaKupovinu($tipovi, $kupljeniRepo->stanjeZaMesec($karticaId, $mesec), $danaUMesecu, $ostaloDana);
+$obroci = obrociZaKupovinu($student, $tipovi, $kupljeniRepo->stanjeZaMesec($karticaId, $mesec), $danaUMesecu, $ostaloDana);
 
 // Podrazumevano po 10 od svakog obroka (ili manje ako ne sme više)
 $forma = ['kolicine' => []];
@@ -110,12 +121,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'kupi'
             continue;
         }
         $kolicina = (int)$vrednost;
+        if ($kolicina > 0 && !$o['dozvoljen']) {
+            $greske[] = $o['tip']->naziv . ': studenti koji žive u Kragujevcu mogu da kupe samo ručak.';
+            continue;
+        }
         if ($kolicina > $o['maks']) {
             $greske[] = $o['tip']->naziv . ': za ' . Format::mesecGodina($mesec) . ' može još najviše ' . $o['maks'] . '.';
             continue;
         }
         if ($kolicina > 0) {
-            $stavke[$tipId] = ['kolicina' => $kolicina, 'cena' => $o['tip']->cena];
+            $stavke[$tipId] = ['kolicina' => $kolicina, 'cena' => $o['cena']];
         }
     }
 

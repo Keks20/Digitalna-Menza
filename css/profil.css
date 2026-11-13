@@ -1,0 +1,84 @@
+/* =========================================================
+   Profil studenta (podaci, kontakt, lozinka, profilna slika)
+   ========================================================= */
+
+.min-w-0 {
+  min-width: 0;
+}
+
+/* Velika profilna slika ili krug sa inicijalima */
+.profile-photo {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.profile-initials {
+  display: grid;
+  place-items: center;
+  background: #e4ecfa;
+  color: var(--blue-dark);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.profile-photo[hidden] {
+  display: none;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  overflow-wrap: anywhere;
+}
+
+.profile-sub {
+  margin-top: 3px !important;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.app-main .profile-photo-form {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #eceff4;
+}
+
+.profile-card .alert {
+  margin-top: 16px;
+}
+
+/* Polje za izbor fajla u izgledu ostalih polja */
+.profile-file {
+  height: auto;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.profile-hint {
+  margin-top: 8px !important;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 575.98px) {
+  .profile-photo {
+    width: 76px;
+    height: 76px;
+  }
+
+  .profile-initials {
+    font-size: 24px;
+  }
+
+  .profile-name {
+    font-size: 18px;
+  }
+}

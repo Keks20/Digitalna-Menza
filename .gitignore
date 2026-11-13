@@ -13,3 +13,10 @@ config.local.php
 
 # Logovi
 *.log
+
+# Uputstvo za Claude Code (samo lokalno)
+CLAUDE.md
+
+# Profilne slike studenata (folder i .htaccess ostaju u repozitorijumu)
+uploads/profilne/*
+!uploads/profilne/.gitkeep

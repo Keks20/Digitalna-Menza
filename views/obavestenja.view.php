@@ -1,8 +1,8 @@
 <?php
 /**
- * PRIKAZ: sva obaveštenja za studenta ("Sve poruke" sa početne).
+ * PRIKAZ: sva obaveštenja za studenta ("Sva obaveštenja" iz zvonceta).
  *
- * U Figmi nema posebnog ekrana – kartice prate blok "Poruke studentima" sa početne.
+ * U Figmi nema posebnog ekrana – kartice prate izgled poruka u aplikaciji.
  * Spisak promenljivih je na vrhu obavestenja.php.
  * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
  */
@@ -19,7 +19,7 @@ require_once __DIR__ . '/delovi/obavestenja_izgled.php';
         <h1 class="page-title">Obaveštenja</h1>
         <p class="page-date">Poruke Studentskog centra, menzi i tvog doma</p>
       </div>
-      <?php $imaObavestenja = false; require __DIR__ . '/delovi/korisnik.php'; ?>
+      <?php require __DIR__ . '/delovi/korisnik.php'; ?>
     </header>
 
     <section class="panel">
@@ -30,10 +30,13 @@ require_once __DIR__ . '/delovi/obavestenja_izgled.php';
 
       <?php foreach ($poruke as $poruka): ?>
         <?php $izgled = izgledObavestenja($poruka); ?>
-        <article class="message d-flex">
+        <article class="message d-flex<?php echo !empty($poruka['novo']) ? ' is-new' : ''; ?>">
           <span class="tint-box <?php echo $izgled['boja']; ?>"><?php echo ikonica($izgled['ikonica']); ?></span>
           <div>
-            <h3 class="message-title"><?php echo htmlspecialchars($poruka['naslov']); ?></h3>
+            <h3 class="message-title">
+              <?php echo htmlspecialchars($poruka['naslov']); ?>
+              <?php if (!empty($poruka['novo'])): ?><span class="tag tag-orange">Novo</span><?php endif; ?>
+            </h3>
             <p class="message-text"><?php echo nl2br(htmlspecialchars($poruka['tekst'])); ?></p>
             <p class="message-meta">
               <?php echo Format::datumVreme($poruka['kreirano']); ?> ·

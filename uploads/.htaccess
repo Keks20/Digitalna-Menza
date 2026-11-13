@@ -1,0 +1,21 @@
+# Folder sa fajlovima koje šalju korisnici (profilne slike).
+# Ovde se nikad ne izvršava kod: PHP je isključen, a pregledaču se daju samo slike.
+Options -Indexes -ExecCGI
+Require all denied
+
+<FilesMatch "\.(?i:jpe?g|png|webp)$">
+    Require all granted
+</FilesMatch>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+RemoveHandler .php .phtml .phar .pht
+RemoveType .php .phtml .phar .pht
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

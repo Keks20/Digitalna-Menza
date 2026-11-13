@@ -7,6 +7,10 @@
 --   student:  kartica 0012 3456 7890, lozinka lozinka123  (Marko Marković)
 --             svi ostali studenti imaju istu lozinku: lozinka123
 --             kartica 0012 3456 3310 je BLOKIRANA (za test greške)
+--   kategorije: studenti 1–20 su u domu (budžet, sva tri obroka po osnovnoj ceni)
+--             0012 3456 3027 i 0012 3456 7781 – budžet, žive u Kragujevcu (samo ručak)
+--             0012 3456 1460 – samofinansiranje, živi u Kragujevcu (samo ručak, trostruka cena)
+--             0012 3456 9203 – samofinansiranje, van Kragujevca (sva tri obroka, trostruka cena)
 --   admin:    admin / admin123
 --   kasir:    kasir / kasir123
 -- =========================================================
@@ -31,7 +35,8 @@ INSERT INTO menze (naziv, adresa, kapacitet_dnevno) VALUES
 ('Menza Vita Janjić', 'Radoja Domanovića 1', 450),
 ('Menza Treći paviljon', 'Radoja Domanovića 1', 300);
 
--- Cene za studente na budžetu (izvor: InfoKG, okt. 2025) – uskladiti sa cenovnikom SC-a
+-- Cene za studente na budžetu (izvor: InfoKG, okt. 2025) – uskladiti sa cenovnikom SC-a.
+-- Samofinansirajući studenti plaćaju trostruku cenu (računa se u aplikaciji, ovde je samo osnovna).
 INSERT INTO tipovi_obroka (naziv, cena, vreme_od, vreme_do) VALUES
 ('Doručak', 56.00, '07:00', '09:30'),
 ('Ručak', 120.00, '11:30', '15:00'),
@@ -1562,3 +1567,58 @@ INSERT INTO obavestenja (naslov, tekst, ciljna_grupa, menza_id, dom, admin_id, k
 ('Menza Vita Janjić – izmena radnog vremena', 'U subotu se obroci u Menzi Vita Janjić izdaju samo do 14 časova. Večera se preuzima u Menzi Ekonomski.', 'menza', 2, NULL, 1, NOW() - INTERVAL 2 DAY),
 ('Aparat za uplate u paviljonu A', 'Aparat za uplate u paviljonu A je privremeno van funkcije. Karticu možete dopuniti kroz aplikaciju.', 'dom', NULL, 'Dom 1', 1, NOW() - INTERVAL 1 DAY),
 ('Nova Digitalna menza', 'Od sada karticu dopunjujete, kupujete obroke i plaćate stanarinu iz aplikacije, bez čekanja na šalteru.', 'svi', NULL, NULL, 1, NOW() - INTERVAL 3 HOUR);
+
+-- ---------- Kategorije studenata ----------
+-- Svi su podrazumevano na budžetu i van Kragujevca (ili u domu). Ovde se izdvajaju ostale kategorije,
+-- a njihove kupovine i uplate se usklađuju sa pravilima kategorije (samo ručak / trostruka cena).
+UPDATE studenti SET prebivaliste = 'kragujevac' WHERE id IN (27, 28, 29);
+UPDATE studenti SET finansiranje = 'samofinansiranje' WHERE id IN (29, 30);
+UPDATE studenti SET telefon = '064 123 4567' WHERE id = 1;
+
+-- Ko živi u Kragujevcu ima samo ručak (tip 2)
+DELETE i FROM iskorisceni_obroci i JOIN kartice k ON k.id = i.kartica_id
+JOIN studenti s ON s.id = k.student_id
+WHERE s.prebivaliste = 'kragujevac' AND i.tip_obroka_id <> 2;
+
+DELETE ko FROM kupljeni_obroci ko JOIN kartice k ON k.id = ko.kartica_id
+JOIN studenti s ON s.id = k.student_id
+WHERE s.prebivaliste = 'kragujevac' AND ko.tip_obroka_id <> 2;
+
+-- Samofinansirajući: trostruka cena obroka i srazmerno veće uplate
+UPDATE kupljeni_obroci ko JOIN kartice k ON k.id = ko.kartica_id
+JOIN studenti s ON s.id = k.student_id
+SET ko.cena_po_obroku = ko.cena_po_obroku * 3
+WHERE s.finansiranje = 'samofinansiranje';
+
+UPDATE transakcije t JOIN kartice k ON k.id = t.kartica_id
+JOIN studenti s ON s.id = k.student_id
+SET t.iznos = t.iznos * 3
+WHERE s.finansiranje = 'samofinansiranje' AND t.tip = 'uplata';
+
+-- Iznos i opis kupovine iz stvarno kupljenih paketa: "(doručak + ručak + večera)"
+UPDATE transakcije t
+JOIN (SELECT ko.transakcija_id,
+             SUM(ko.kolicina * ko.cena_po_obroku) AS ukupno,
+             SUM(IF(ko.tip_obroka_id = 1, ko.kolicina, 0)) AS dorucak,
+             SUM(IF(ko.tip_obroka_id = 2, ko.kolicina, 0)) AS rucak,
+             SUM(IF(ko.tip_obroka_id = 3, ko.kolicina, 0)) AS vecera
+      FROM kupljeni_obroci ko GROUP BY ko.transakcija_id) p ON p.transakcija_id = t.id
+JOIN kartice k ON k.id = t.kartica_id
+JOIN studenti s ON s.id = k.student_id
+SET t.iznos = -p.ukupno,
+    t.opis = CONCAT('Kupovina obroka za mesec (', p.dorucak, ' + ', p.rucak, ' + ', p.vecera, ')')
+WHERE s.prebivaliste = 'kragujevac' OR s.finansiranje = 'samofinansiranje';
+
+-- Stanje posle svake uspešne transakcije i stanje kartice se računaju ponovo za izmenjene kartice
+UPDATE transakcije t
+JOIN (SELECT t2.id, SUM(t2.iznos) OVER (PARTITION BY t2.kartica_id ORDER BY t2.kreirano, t2.id) AS stanje
+      FROM transakcije t2 WHERE t2.status = 'uspesno') r ON r.id = t.id
+JOIN kartice k ON k.id = t.kartica_id
+JOIN studenti s ON s.id = k.student_id
+SET t.stanje_posle = r.stanje
+WHERE s.prebivaliste = 'kragujevac' OR s.finansiranje = 'samofinansiranje';
+
+UPDATE kartice k
+JOIN studenti s ON s.id = k.student_id
+SET k.stanje = (SELECT COALESCE(SUM(t.iznos), 0) FROM transakcije t WHERE t.kartica_id = k.id AND t.status = 'uspesno')
+WHERE s.prebivaliste = 'kragujevac' OR s.finansiranje = 'samofinansiranje';

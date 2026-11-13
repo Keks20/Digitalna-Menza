@@ -19,6 +19,8 @@ $IZGLED_TIPA = [
     'obroci' => ['ikonica' => 'korpa', 'boja' => 'tint-blue', 'oznaka' => 'tag-blue', 'zbir' => 'Kupovina obroka'],
     'smestaj' => ['ikonica' => 'kuca', 'boja' => 'tint-orange', 'oznaka' => 'tag-orange', 'zbir' => 'Smeštaj'],
 ];
+// Refundacija ima oznaku u tabeli, a u zbirovima je već oduzeta od uplata
+$OZNAKA_TIPA = ['uplata' => 'tag-green', 'obroci' => 'tag-blue', 'smestaj' => 'tag-orange', 'refundacija' => 'tag-gray'];
 $OZNAKA_STATUSA = [
     'ceka_potvrdu' => 'tag-orange',
     'odbijeno' => 'tag-red',
@@ -47,6 +49,9 @@ $poslednjaNaStrani = ($strana - 1) * $poStrani + count($transakcije);
       </div>
     </header>
 
+    <?php if ($poruka): ?>
+      <div class="alert app-alert alert-<?php echo $poruka['tip'] === 'success' ? 'success' : 'danger'; ?> mb-3 mb-lg-4 no-print" role="alert"><?php echo htmlspecialchars($poruka['tekst']); ?></div>
+    <?php endif; ?>
     <?php if ($greska !== ''): ?>
       <div class="alert app-alert alert-danger mb-3 mb-lg-4 no-print" role="alert"><?php echo htmlspecialchars($greska); ?></div>
     <?php endif; ?>
@@ -128,7 +133,7 @@ $poslednjaNaStrani = ($strana - 1) * $poStrani + count($transakcije);
         <?php foreach ($transakcije as $t): ?>
           <?php
             $uspesna = $t->status === 'uspesno';
-            $klasaIznosa = !$uspesna ? 'tx-muted' : ($t->iznos > 0 ? 'tx-plus' : '');
+            $klasaIznosa = (!$uspesna || $t->refundirano !== null) ? 'tx-muted' : ($t->iznos > 0 ? 'tx-plus' : '');
           ?>
           <article class="tx-row" title="<?php echo Format::brojTransakcije((int)$t->id, $t->kreirano); ?>">
             <div class="tx-date"><?php echo Format::datumVreme($t->kreirano); ?></div>
@@ -136,10 +141,24 @@ $poslednjaNaStrani = ($strana - 1) * $poStrani + count($transakcije);
               <?php echo htmlspecialchars($t->opis); ?>
               <?php if (!$uspesna): ?>
                 <span class="tag <?php echo $OZNAKA_STATUSA[$t->status] ?? 'tag-gray'; ?>"><?php echo Format::statusTransakcije($t->status); ?></span>
+              <?php elseif ($t->refundirano !== null): ?>
+                <span class="tag tag-gray">Refundirano</span>
+              <?php elseif (isset($refundabilne[$t->id])): ?>
+                <!-- Uplata mlađa od sat vremena, posle koje ništa nije plaćeno -->
+                <form method="post" action="refundacija.php" class="tx-refund no-print"
+                      onsubmit="return confirm('Refundirati ovu uplatu? Iznos će biti skinut sa studentske kartice.');">
+                  <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+                  <input type="hidden" name="id" value="<?php echo (int)$t->id; ?>" />
+                  <input type="hidden" name="nazad" value="istorija" />
+                  <button type="submit" class="btn-refund-sm"
+                          title="Refundacija je moguća do <?php echo date('H:i', strtotime($refundabilne[$t->id])); ?>, dok novac ne potrošiš">
+                    <?php echo ikonica('nazad'); ?> Refundiraj · do <?php echo date('H:i', strtotime($refundabilne[$t->id])); ?>
+                  </button>
+                </form>
               <?php endif; ?>
             </div>
             <div class="tx-col-tip">
-              <span class="tag ms-0 <?php echo $IZGLED_TIPA[$t->tip]['oznaka'] ?? 'tag-gray'; ?>"><?php echo Format::tipTransakcije($t->tip); ?></span>
+              <span class="tag ms-0 <?php echo $OZNAKA_TIPA[$t->tip] ?? 'tag-gray'; ?>"><?php echo Format::tipTransakcije($t->tip); ?></span>
             </div>
             <div class="tx-amount <?php echo $klasaIznosa; ?><?php echo $t->status === 'odbijeno' ? ' tx-strike' : ''; ?>">
               <?php echo Format::novac($t->iznos, true); ?>

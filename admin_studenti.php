@@ -1,6 +1,6 @@
 <?php
 /**
- * LOGIKA: studenti i njihove kartice – pretraga i blokiranje kartice (samo administrator).
+ * LOGIKA: studenti i njihove kartice – pretraga, kategorija studenta i blokiranje kartice (samo administrator).
  * Izgled je u views/admin_studenti.view.php.
  *
  * Adresa: admin_studenti.php                              – svi studenti, po prezimenu
@@ -13,13 +13,23 @@
  * Forma za karticu šalje POST: akcija (blokiraj | odblokiraj), kartica_id, csrf_token
  * i skrivena polja filter_q, filter_status, filter_strana (da se posle izmene vrati na isti spisak).
  * Menja se samo kartice.status, nikad stanje. Posle izmene: preusmeravanje nazad sa porukom (Post/Redirect/Get).
+ *
+ * Forma za kategoriju šalje POST: akcija=kategorija, student_id, finansiranje (budzet | samofinansiranje),
+ * prebivaliste (van_kragujevca | kragujevac), csrf_token i ista skrivena polja filtera.
+ * Kategorija određuje cenu obroka (samofinansiranje = trostruka) i koje obroke student sme da kupi
+ * (ko živi u Kragujevcu i nije u domu – samo ručak); pravila su u src/Student.php.
+ * Već kupljeni obroci se ne menjaju, nova pravila važe od sledeće kupovine.
+ *
  * Blokirana kartica ne može da se prijavi, dopuni, kupi obroke ni dobije obrok na kasi;
  * student koji je baš tada prijavljen biva odjavljen na sledećem kliku (includes/provera_prijave.php).
  *
  * Prikaz dobija:
  *   $admin          Admin        prijavljeni administrator
  *   $studenti       array        studenti na ovoj strani: [['id', 'ime', 'prezime', 'broj_indeksa', 'ustanova', 'email',
+ *                                'finansiranje', 'prebivaliste', 'u_domu', 'kategorija' (npr. "Budžet · studentski dom"),
  *                                'kartica_id', 'broj_kartice', 'stanje', 'status'], ...]
+ *   $FINANSIRANJA   array        ['budzet' => 'Budžet', 'samofinansiranje' => 'Samofinansiranje'] za izbor u formi
+ *   $PREBIVALISTA   array        ['van_kragujevca' => 'Van Kragujevca', 'kragujevac' => 'Kragujevac']
  *   $q              string       tekst iz polja za pretragu
  *   $filterStatus   string       '' | 'aktivna' | 'blokirana'
  *   $FILTERI        array        ['' => 'Svi', 'aktivna' => 'Aktivne kartice', 'blokirana' => 'Blokirane']
@@ -68,8 +78,11 @@ function adminStudentiUrl(array $izmene = []): string
 $studentRepo = new StudentRepository();
 $karticaRepo = new KarticaRepository();
 
+$FINANSIRANJA = Student::FINANSIRANJA;
+$PREBIVALISTA = Student::PREBIVALISTA;
+
 // =====================================================================
-// POST – blokiranje / odblokiranje kartice
+// POST – kategorija studenta, blokiranje / odblokiranje kartice
 // =====================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $akcija = (string)($_POST['akcija'] ?? '');
@@ -78,6 +91,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$adminAuth->validateCsrfToken($_POST['csrf_token'] ?? '')) {
         Poruka::postavi('danger', 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.');
+        header('Location: ' . $nazad);
+        exit;
+    }
+
+    // ---------- Kategorija studenta ----------
+    if ($akcija === 'kategorija') {
+        $finansiranje = (string)($_POST['finansiranje'] ?? '');
+        $prebivaliste = (string)($_POST['prebivaliste'] ?? '');
+        $izabrani = $studentRepo->read((int)($_POST['student_id'] ?? 0));
+
+        if (!$izabrani) {
+            Poruka::postavi('danger', 'Student ne postoji.');
+        } elseif (!isset($FINANSIRANJA[$finansiranje]) || !isset($PREBIVALISTA[$prebivaliste])) {
+            Poruka::postavi('danger', 'Izaberi finansiranje i mesto stanovanja iz ponuđenih.');
+        } else {
+            $studentRepo->postaviKategoriju((int)$izabrani->id, $finansiranje, $prebivaliste);
+            $izabrani = $studentRepo->read((int)$izabrani->id);
+            Poruka::postavi('success', $izabrani->punoIme() . ': kategorija je sada „' . $izabrani->nazivKategorije()
+                . '“ – ' . ($izabrani->samoRucak() ? 'samo ručak' : 'sva tri obroka') . ', '
+                . ($izabrani->jeSamofinansirajuci() ? 'trostruka cena.' : 'osnovna cena.'));
+        }
         header('Location: ' . $nazad);
         exit;
     }
@@ -115,6 +149,10 @@ $brojStrana = max(1, (int)ceil($ukupno / $poStrani));
 $strana = min($strana, $brojStrana);
 
 $studenti = $studentRepo->pretraga($uslovi + ['limit' => $poStrani, 'offset' => ($strana - 1) * $poStrani]);
+foreach ($studenti as &$red) {
+    $red['kategorija'] = (new Student($red))->nazivKategorije();
+}
+unset($red);
 $brojPoStatusu = $studentRepo->brojPoStatusuKartice();
 $poruka = Poruka::uzmi();
 $csrfToken = $adminAuth->generateCsrfToken();

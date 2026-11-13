@@ -1,6 +1,7 @@
 <?php
 /**
- * PRIKAZ: studenti i kartice – pretraga i blokiranje kartice (samo administrator).
+ * PRIKAZ: studenti i kartice – pretraga, kategorija studenta i blokiranje kartice (samo administrator).
+ * Klik na kategoriju otvara prozor sa formom (jedan za ceo spisak; puni ga skripta na dnu iz data-atributa dugmeta).
  *
  * Spisak promenljivih i imena polja forme su na vrhu admin_studenti.php.
  * Samo prikaz, bez upita u bazu; tekst iz baze se ispisuje kroz htmlspecialchars().
@@ -22,7 +23,7 @@ $ukupnoKartica = array_sum($brojPoStatusu);
     <header class="page-header d-flex justify-content-between align-items-start gap-3">
       <div>
         <h1 class="page-title">Studenti</h1>
-        <p class="page-date">Pretraga studenata i blokiranje studentske kartice</p>
+        <p class="page-date">Pretraga studenata, kategorija i blokiranje studentske kartice</p>
       </div>
       <?php require __DIR__ . '/delovi/korisnik.php'; ?>
     </header>
@@ -83,6 +84,15 @@ $ukupnoKartica = array_sum($brojPoStatusu);
             <div class="st-school min-w-0">
               <p class="st-index"><?php echo htmlspecialchars($s['broj_indeksa']); ?></p>
               <p class="pay-sub text-truncate"><?php echo htmlspecialchars($s['ustanova']); ?></p>
+              <button type="button" class="st-category" data-bs-toggle="modal" data-bs-target="#prozorKategorija"
+                      data-student-id="<?php echo (int)$s['id']; ?>"
+                      data-ime="<?php echo htmlspecialchars($imePrezime); ?>"
+                      data-finansiranje="<?php echo htmlspecialchars($s['finansiranje']); ?>"
+                      data-prebivaliste="<?php echo htmlspecialchars($s['prebivaliste']); ?>"
+                      data-u-domu="<?php echo (int)$s['u_domu']; ?>"
+                      aria-label="Izmeni kategoriju: <?php echo htmlspecialchars($imePrezime . ', ' . $s['kategorija']); ?>">
+                <?php echo htmlspecialchars($s['kategorija']); ?> <?php echo ikonica('olovka'); ?>
+              </button>
             </div>
             <div class="st-card"><?php echo htmlspecialchars(Format::brojKartice($s['broj_kartice'])); ?></div>
             <div class="st-balance"><?php echo Format::novac($s['stanje']); ?></div>
@@ -136,6 +146,76 @@ $ukupnoKartica = array_sum($brojPoStatusu);
         <?php endif; ?>
       </div>
     </section>
+
+    <!-- Prozor za izmenu kategorije (jedan za sve studente) -->
+    <div class="modal fade" id="prozorKategorija" tabindex="-1" aria-labelledby="prozorKategorijaNaslov" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="admin_studenti.php" class="modal-content category-modal">
+          <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>" />
+          <input type="hidden" name="akcija" value="kategorija" />
+          <input type="hidden" name="student_id" id="kategorijaStudentId" value="" />
+          <input type="hidden" name="filter_q" value="<?php echo htmlspecialchars($q); ?>" />
+          <input type="hidden" name="filter_status" value="<?php echo htmlspecialchars($filterStatus); ?>" />
+          <input type="hidden" name="filter_strana" value="<?php echo $strana; ?>" />
+
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title" id="prozorKategorijaNaslov">Kategorija studenta</h2>
+              <p class="pay-sub" id="kategorijaIme"></p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+          </div>
+
+          <div class="modal-body">
+            <label for="kategorijaFinansiranje" class="form-label">Finansiranje</label>
+            <select class="form-select app-input mb-3" id="kategorijaFinansiranje" name="finansiranje">
+              <?php foreach ($FINANSIRANJA as $vrednost => $naziv): ?>
+                <option value="<?php echo $vrednost; ?>"><?php echo $naziv; ?></option>
+              <?php endforeach; ?>
+            </select>
+
+            <label for="kategorijaPrebivaliste" class="form-label">Mesto stanovanja</label>
+            <select class="form-select app-input" id="kategorijaPrebivaliste" name="prebivaliste">
+              <?php foreach ($PREBIVALISTA as $vrednost => $naziv): ?>
+                <option value="<?php echo $vrednost; ?>"><?php echo $naziv; ?></option>
+              <?php endforeach; ?>
+            </select>
+            <p class="pay-sub mt-2" id="kategorijaDom" hidden>
+              Student ima ugovor u studentskom domu, pa se računa kao da živi van Kragujevca dok ugovor važi.
+            </p>
+
+            <div class="note-box mt-3">
+              <?php echo ikonica('info'); ?>
+              <p>
+                Budžet – osnovna cena obroka; samofinansiranje – trostruka cena.
+                Ko živi u Kragujevcu (a nije u domu) može da kupi samo ručak.
+                Već kupljeni obroci ostaju, pravila važe od sledeće kupovine.
+              </p>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-app btn-app-outline" data-bs-dismiss="modal">Odustani</button>
+            <button type="submit" class="btn btn-primary btn-app"><?php echo ikonica('sacuvaj'); ?> Sačuvaj kategoriju</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
+
+  <script>
+    // Prozor za kategoriju se puni podacima studenta na čije je dugme kliknuto
+    (function () {
+      const prozor = document.getElementById('prozorKategorija');
+      prozor.addEventListener('show.bs.modal', function (dogadjaj) {
+        const dugme = dogadjaj.relatedTarget;
+        document.getElementById('kategorijaStudentId').value = dugme.dataset.studentId;
+        document.getElementById('kategorijaIme').textContent = dugme.dataset.ime;
+        document.getElementById('kategorijaFinansiranje').value = dugme.dataset.finansiranje;
+        document.getElementById('kategorijaPrebivaliste').value = dugme.dataset.prebivaliste;
+        document.getElementById('kategorijaDom').hidden = dugme.dataset.uDomu !== '1';
+      });
+    })();
+  </script>
 
 <?php require __DIR__ . '/delovi/podnozje.php'; ?>

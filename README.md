@@ -31,6 +31,9 @@ Tehnologije: PHP 8 (OOP), MySQL/MariaDB (mysqli, prepared statements), Bootstrap
 | Student (Marko Marković) | kartica `0012 3456 7890` | `lozinka123` |
 | Ostali studenti (29) | kartice iz tabele `kartice` | `lozinka123` |
 | Blokirana kartica | `0012 3456 3310` | `lozinka123` |
+| Budžet, živi u Kragujevcu (samo ručak) | `0012 3456 3027`, `0012 3456 7781` | `lozinka123` |
+| Samofinansiranje, živi u Kragujevcu (samo ručak, 3× cena) | `0012 3456 1460` | `lozinka123` |
+| Samofinansiranje, van Kragujevca (svi obroci, 3× cena) | `0012 3456 9203` | `lozinka123` |
 | Admin | `admin` | `admin123` |
 | Kasir | `kasir` | `kasir123` |
 
@@ -69,7 +72,10 @@ smestaj.php              smeštaj: ugovor, mesečna zaduženja, plaćanje stanar
 admin_login.php          prijava zaposlenih (admin i kasir), admin_logout.php – odjava
 admin_pocetna.php        administratorski pregled: uplate, prodati i izdati obroci danas, 7 dana, po menzama (samo admin)
 admin_jelovnik.php       unos jelovnika po danu i menzi (nacrt / objava, kopiranje od juče) i cene obroka
-admin_uplate.php         uplate studenata (filter, pretraga, potvrda/odbijanje IPS uplata) i obaveštenja
+admin_uplate.php         pregled uplata studenata (filter, pretraga – bez potvrde i odbijanja) i obaveštenja
+profil.php               profil: podaci, kategorija, promena lozinke, e-adrese, telefona i profilne slike
+refundacija.php          refundacija uplate (student, do sat vremena posle uplate, dok novac nije potrošen)
+obavestenja_procitano.php  zvonce je otvoreno – obaveštenja postaju pročitana (poziva js/zvonce.js)
 kasir_bonovi.php         provera QR bona i izdavanje obroka na kasi (kasir i admin)
 admin_smestaj.php        ko je platio stanarinu po mesecu (filter, pretraga) i pravljenje mesečnih zaduženja
 views/                   IZGLED stranica (samo HTML i prikaz promenljivih, bez upita u bazu)

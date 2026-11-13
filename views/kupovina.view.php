@@ -62,20 +62,30 @@ $naziviMenzi = array_map(fn($m) => preg_replace('/^Menza\s+/u', '', $m['naziv'])
               <?php endforeach; ?>
             </div>
 
+            <div class="note-box buy-category mb-4">
+              <?php echo ikonica('korisnik'); ?>
+              <p>
+                <strong><?php echo htmlspecialchars($student->nazivKategorije()); ?></strong><br />
+                <?php echo htmlspecialchars($student->opisKategorije()); ?>
+              </p>
+            </div>
+
             <h2 class="panel-title mb-2">Broj obroka</h2>
             <?php foreach ($obroci as $tipId => $o): ?>
               <?php
                 $izgled = $izgledObroka[(int)$tipId] ?? ['ikonica' => 'solja', 'boja' => 'tint-blue'];
                 $nema = $o['maks'] === 0;
               ?>
-              <div class="buy-row d-flex flex-wrap align-items-center<?php echo $nema ? ' is-full' : ''; ?>">
+              <div class="buy-row d-flex flex-wrap align-items-center<?php echo $nema ? ' is-full' : ''; ?><?php echo !$o['dozvoljen'] ? ' is-locked' : ''; ?>">
                 <span class="tint-box tint-box-lg <?php echo $izgled['boja']; ?>"><?php echo ikonica($izgled['ikonica']); ?></span>
                 <div class="buy-info">
                   <label for="kolicina-<?php echo $tipId; ?>" class="buy-name"><?php echo htmlspecialchars($o['tip']->naziv); ?></label>
                   <div class="buy-meta">
-                    <?php echo $o['tip']->radnoVreme(); ?> · <?php echo Format::cena($o['tip']->cena); ?> po obroku
+                    <?php echo $o['tip']->radnoVreme(); ?> · <?php echo Format::cena($o['cena']); ?> po obroku
                   </div>
-                  <?php if ($o['kupljeno'] > 0 || $nema): ?>
+                  <?php if (!$o['dozvoljen']): ?>
+                    <div class="buy-meta"><span class="tag tag-gray ms-0">Nije dostupno za tvoju kategoriju</span></div>
+                  <?php elseif ($o['kupljeno'] > 0 || $nema): ?>
                     <div class="buy-meta">
                       <?php if ($o['kupljeno'] > 0): ?>već kupljeno <?php echo $o['kupljeno']; ?> · <?php endif; ?>
                       <?php echo $nema ? 'za ovaj mesec više ne može' : 'najviše još ' . $o['maks']; ?>
@@ -89,7 +99,7 @@ $naziviMenzi = array_map(fn($m) => preg_replace('/^Menza\s+/u', '', $m['naziv'])
                   <input type="number" class="stepper-input" id="kolicina-<?php echo $tipId; ?>"
                          name="kolicina[<?php echo $tipId; ?>]" min="0" max="<?php echo $o['maks']; ?>" step="1" inputmode="numeric"
                          value="<?php echo htmlspecialchars((string)$forma['kolicine'][$tipId]); ?>"
-                         data-cena="<?php echo $o['tip']->cena; ?>" data-naziv="<?php echo htmlspecialchars($o['tip']->naziv); ?>"
+                         data-cena="<?php echo $o['cena']; ?>" data-naziv="<?php echo htmlspecialchars($o['tip']->naziv); ?>"
                          <?php echo $nema ? 'readonly' : ''; ?> />
                   <button type="button" class="stepper-btn" data-korak="1" data-za="kolicina-<?php echo $tipId; ?>"
                           aria-label="Više: <?php echo htmlspecialchars($o['tip']->naziv); ?>" <?php echo $nema ? 'disabled' : ''; ?>><?php echo ikonica('plus'); ?></button>

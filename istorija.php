@@ -23,6 +23,10 @@
  *   $poStrani      int
  *   $stampa        bool            true = izgled za štampu / PDF
  *   $greska        string          poruka kad je period pogrešno unet ('' ako je sve u redu)
+ *   $refundabilne  array           [id uplate => rok '2026-11-13 15:42:10'] – uplate koje još mogu da se refundiraju;
+ *                                  uz njih ide forma: POST na refundacija.php (id, nazad=istorija, csrf_token)
+ *   $poruka        array|null      ['tip' => 'success'|'danger', 'tekst' => '...'] posle refundacije
+ *   $csrfToken     string
  *   istorijaUrl([...])             funkcija – link sa trenutnim filterom i izmenama, npr. istorijaUrl(['strana' => 2])
  *
  * Imena polja u formi (GET): tip, od, do
@@ -31,6 +35,7 @@ require_once __DIR__ . '/includes/provera_prijave.php';
 require_once __DIR__ . '/src/StudentRepository.php';
 require_once __DIR__ . '/src/KarticaRepository.php';
 require_once __DIR__ . '/src/TransakcijaRepository.php';
+require_once __DIR__ . '/src/Poruka.php';
 require_once __DIR__ . '/src/Format.php';
 
 const PO_STRANI = 10;
@@ -38,7 +43,7 @@ const NAJVISE_ZA_IZVOZ = 1000;
 
 $TIPOVI = [
     '' => 'Sve',
-    'uplata' => 'Uplate',
+    'uplata' => 'Uplate',          // sa refundacijama
     'obroci' => 'Obroci',
     'smestaj' => 'Smeštaj',
 ];
@@ -127,5 +132,10 @@ if ($stampa) {
 $zbirovi = $transakcijaRepo->zbirPoTipu($karticaId, $od, $do);
 $student = (new StudentRepository())->read($studentId);
 $kartica = (new KarticaRepository())->read($karticaId);
+
+// U štampi nema dugmadi, pa ni refundacije
+$refundabilne = $stampa ? [] : $transakcijaRepo->refundabilneUplate($karticaId);
+$poruka = Poruka::uzmi();
+$csrfToken = $auth->generateCsrfToken();
 
 require __DIR__ . '/views/istorija.view.php';
