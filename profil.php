@@ -6,7 +6,8 @@
  * Adresa: profil.php
  *
  * Forme šalju POST sa poljem "akcija" (svaka ima csrf_token):
- *   kontakt       – email, telefon (prazan telefon = broj se briše)
+ *   kontakt       – email, telefon (prazan telefon = broj se briše), lozinka_potvrda (trenutna lozinka;
+ *                   obavezna samo kad se e-adresa menja)
  *   lozinka       – stara_lozinka, nova_lozinka, potvrda_lozinke
  *   slika         – slika (fajl: JPG, PNG ili WebP, najviše 2 MB); forma mora imati enctype="multipart/form-data"
  *   ukloni_sliku  – briše profilnu sliku
@@ -92,6 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $greske['kontakt'][] = 'E-adresa nije ispravna (primer: ime@primer.rs).';
         } elseif ($studentRepo->emailZauzet($email, $studentId)) {
             $greske['kontakt'][] = 'Ovu e-adresu već koristi drugi student.';
+        }
+
+        // Nova e-adresa se prihvata samo uz trenutnu lozinku: ko zatekne otvoren profil ne može
+        // da preusmeri obaveštenja Studentskog centra na svoju adresu. Za telefon lozinka nije potrebna.
+        $menjaEmail = mb_strtolower($email) !== mb_strtolower((string)$student->email);
+        if ($menjaEmail && empty($greske['kontakt'])) {
+            $lozinkaZaPotvrdu = (string)($_POST['lozinka_potvrda'] ?? '');
+            if ($lozinkaZaPotvrdu === '') {
+                $greske['kontakt'][] = 'Za promenu e-adrese upiši trenutnu lozinku.';
+            } elseif (!$karticaRepo->proveriLozinku($karticaId, $lozinkaZaPotvrdu)) {
+                $greske['kontakt'][] = 'Trenutna lozinka nije tačna, pa e-adresa nije promenjena.';
+            }
         }
 
         // Telefon: cifre, razmaci, crtice, kosa crta i + na početku; 6–15 cifara ("064 123 4567", "+381 64 1234567")

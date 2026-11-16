@@ -18,7 +18,8 @@ require_once __DIR__ . '/../src/ObavestenjeRepository.php';
 
 $auth = new Auth();
 if (!$auth->check()) {
-    header('Location: login.php');
+    // Posle 20 minuta bez aktivnosti student je odjavljen, pa prijava to i kaže
+    header('Location: login.php' . ($auth->sesijaIstekla() ? '?istekla=1' : ''));
     exit;
 }
 

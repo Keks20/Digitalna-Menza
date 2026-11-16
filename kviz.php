@@ -14,6 +14,9 @@
  * prema tim pitanjima – ne može da se pošalje drugo pitanje ili isti kviz dva puta.
  * Posle slanja: upis u kviz_rezultati, pa preusmeravanje na kviz.php (Post/Redirect/Get).
  *
+ * Da lista najboljih ne može da se zatrpa: iz jedne sesije najviše 5 kvizova u 10 minuta,
+ * sa jedne IP adrese najviše 20 na sat, a kviz rešen za manje od 10 sekundi se ne prihvata.
+ *
  * Prikaz dobija:
  *   $prijavljen    bool             da li je student prijavljen (sa menijem) ili je gost (bez menija)
  *   $student       Student|null     za zaglavlje i meni (null za gosta)
@@ -39,6 +42,13 @@ require_once __DIR__ . '/src/Format.php';
 const BROJ_PITANJA = 10;
 const NAJKRACE_IME = 2;
 const NAJDUZE_IME = 50;
+
+// Zaštita liste najboljih od zatrpavanja rezultatima
+const NAJVISE_SLANJA = 5;            // toliko kvizova iz jedne sesije ...
+const PERIOD_SLANJA_MIN = 10;        // ... u ovoliko minuta
+const NAJVISE_SA_ADRESE = 20;        // toliko kvizova sa jedne IP adrese (ceo dom može da deli jednu) ...
+const PERIOD_ADRESE_MIN = 60;        // ... u ovoliko minuta
+const NAJKRACE_TRAJANJE_SEK = 10;    // 10 pitanja ne može da se pročita i reši brže
 
 /** 192 -> "3 min 12 s", 45 -> "45 s" */
 function trajanjeTekst(int $sekunde): string
@@ -126,6 +136,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'posal
             $greske[] = 'Odgovori na sva pitanja – bez odgovora je ostalo još ' . $neodgovoreno . '.';
         }
 
+        // Ograničenja slanja: prebrzo rešen kviz, previše kvizova iz ove sesije ili sa ove adrese
+        $ip = $auth->adresaKlijenta();
+        $odPre = time() - PERIOD_SLANJA_MIN * 60;
+        $slanja = array_values(array_filter((array)($_SESSION['kviz_slanja'] ?? []), fn($t) => (int)$t > $odPre));
+        if (empty($greske)) {
+            if (time() - (int)$kviz['pocetak'] < NAJKRACE_TRAJANJE_SEK) {
+                $greske[] = 'Odgovori su poslati prebrzo. Pročitaj pitanja pa pošalji ponovo.';
+            } elseif (count($slanja) >= NAJVISE_SLANJA) {
+                $cekanje = max(1, (int)ceil((min($slanja) + PERIOD_SLANJA_MIN * 60 - time()) / 60));
+                $greske[] = 'Poslato je previše kvizova za kratko vreme. Pokušaj ponovo za ' . $cekanje . ' min.';
+            } elseif ($kvizRepo->brojSlanjaSaAdrese($ip, PERIOD_ADRESE_MIN) >= NAJVISE_SA_ADRESE) {
+                $greske[] = 'Sa ove mreže je poslato previše kvizova. Pokušaj ponovo kasnije.';
+            }
+        }
+
         if (empty($greske)) {
             $pitanjaKviza = $kvizRepo->poIdjevima($kviz['pitanja']);
             $brojTacnih = 0;
@@ -138,7 +163,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'posal
             $trajanje = max(0, time() - (int)$kviz['pocetak']);
 
             try {
-                $rezultatId = $kvizRepo->sacuvajRezultat($prijavljen ? $auth->studentId() : null, $ime, $brojTacnih, $ukupno, $trajanje);
+                $rezultatId = $kvizRepo->sacuvajRezultat($prijavljen ? $auth->studentId() : null, $ime, $brojTacnih, $ukupno, $trajanje, $ip);
+                $slanja[] = time();
+                $_SESSION['kviz_slanja'] = $slanja;
 
                 $_SESSION['kviz_rezultat'] = [
                     'id' => $rezultatId,

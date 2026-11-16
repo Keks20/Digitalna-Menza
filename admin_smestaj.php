@@ -33,6 +33,7 @@ require_once __DIR__ . '/includes/provera_admina.php';
 require_once __DIR__ . '/src/SmestajRepository.php';
 require_once __DIR__ . '/src/Poruka.php';
 require_once __DIR__ . '/src/Format.php';
+require_once __DIR__ . '/src/AdminDnevnikRepository.php';
 
 $FILTERI = [
     '' => 'Sve',
@@ -83,6 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'napra
         Poruka::postavi('danger', 'Zaduženja mogu da se naprave samo za tekući i sledeći mesec.');
     } else {
         $broj = $smestajRepo->napraviZaduzenja($mesec);
+        // U dnevnik akcija ide samo kad je nešto zaista napravljeno
+        if ($broj > 0) {
+            (new AdminDnevnikRepository())->upisi($admin, 'zaduzenja', 'Napravljeno ' . $broj . ' '
+                . Format::mnozina($broj, 'zaduženje', 'zaduženja', 'zaduženja') . ' stanarine za ' . Format::mesecGodina($mesec) . '.');
+        }
         Poruka::postavi('success', $broj > 0
             ? 'Napravljeno je ' . $broj . ' ' . Format::mnozina($broj, 'zaduženje', 'zaduženja', 'zaduženja') . ' za ' . Format::mesecGodina($mesec) . '.'
             : 'Svi aktivni ugovori već imaju zaduženje za ' . Format::mesecGodina($mesec) . '.');

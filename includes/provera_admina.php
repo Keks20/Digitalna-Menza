@@ -21,7 +21,8 @@ $adminAuth = new AdminAuth();
 
 // Nije prijavljen kao zaposleni -> na administratorsku prijavu
 if (!$adminAuth->check()) {
-    header('Location: admin_login.php');
+    // Posle 20 minuta bez aktivnosti zaposleni je odjavljen, pa prijava to i kaže
+    header('Location: admin_login.php' . ($adminAuth->sesijaIstekla() ? '?istekla=1' : ''));
     exit;
 }
 

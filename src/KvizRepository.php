@@ -108,14 +108,27 @@ class KvizRepository extends BaseRepository
     /**
      * Upis rezultata; $studentId je null za neprijavljenog korisnika. Vraća id novog reda.
      */
-    public function sacuvajRezultat(?int $studentId, string $ime, int $brojTacnih, int $ukupno, int $trajanjeSek): int
+    public function sacuvajRezultat(?int $studentId, string $ime, int $brojTacnih, int $ukupno, int $trajanjeSek, ?string $ip = null): int
     {
         $stmt = $this->conn->prepare(
-            'INSERT INTO kviz_rezultati (student_id, ime, broj_tacnih, ukupno, trajanje_sek) VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO kviz_rezultati (student_id, ime, broj_tacnih, ukupno, trajanje_sek, ip) VALUES (?, ?, ?, ?, ?, ?)'
         );
-        $stmt->bind_param('isiii', $studentId, $ime, $brojTacnih, $ukupno, $trajanjeSek);
+        $stmt->bind_param('isiiis', $studentId, $ime, $brojTacnih, $ukupno, $trajanjeSek, $ip);
         $stmt->execute();
         return $this->conn->insert_id;
+    }
+
+    /**
+     * Koliko je kvizova poslato sa ove IP adrese u poslednjih $minuta minuta (ograničenje broja slanja).
+     */
+    public function brojSlanjaSaAdrese(string $ip, int $minuta): int
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT COUNT(*) AS broj FROM kviz_rezultati WHERE ip = ? AND kreirano > NOW() - INTERVAL ? MINUTE'
+        );
+        $stmt->bind_param('si', $ip, $minuta);
+        $stmt->execute();
+        return (int)$stmt->get_result()->fetch_assoc()['broj'];
     }
 
     /**

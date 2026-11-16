@@ -82,3 +82,9 @@
     font-size: 18px;
   }
 }
+
+/* Napomena u oznaci polja (npr. "samo ako menjaš e-adresu") */
+.profile-optional {
+  color: var(--muted);
+  font-weight: 400;
+}

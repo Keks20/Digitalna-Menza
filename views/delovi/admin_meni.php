@@ -21,6 +21,7 @@ $stavkeMenija = [
     ['fajl' => 'kasir_bonovi.php',   'naziv' => 'Provera bonova',       'ikonica' => 'qr',       'traka' => 'Bonovi',   'uloge' => ['admin', 'kasir']],
     ['fajl' => 'admin_smestaj.php',  'naziv' => 'Smeštaj',              'ikonica' => 'kuca',     'traka' => null,       'uloge' => ['admin']],
     ['fajl' => 'admin_studenti.php', 'naziv' => 'Studenti',             'ikonica' => 'studenti', 'traka' => null,       'uloge' => ['admin']],
+    ['fajl' => 'admin_dnevnik.php',  'naziv' => 'Dnevnik',              'ikonica' => 'istorija', 'traka' => null,       'uloge' => ['admin']],
 ];
 $stavkeMenija = array_values(array_filter($stavkeMenija, fn($s) => in_array($admin->uloga, $s['uloge'], true)));
 

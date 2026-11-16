@@ -7,6 +7,7 @@ require_once __DIR__ . '/BaseAuth.php';
  *
  * Podaci o prijavi zaposlenog čuvaju se pod drugim ključevima u sesiji nego student
  * (admin_id, admin_uloga), pa se studentska i administratorska prijava ne mešaju.
+ * Ograničenje pokušaja prijave i odjava posle neaktivnosti su nasleđeni iz BaseAuth.
  */
 class AdminAuth extends BaseAuth
 {
@@ -16,9 +17,24 @@ class AdminAuth extends BaseAuth
         'kasir' => 'kasir_bonovi.php',
     ];
 
+    protected function kljucAktivnosti(): string
+    {
+        return 'admin_aktivnost';
+    }
+
+    protected function vrstaPrijave(): string
+    {
+        return 'zaposleni';
+    }
+
     public function login(string $korisnickoIme, string $lozinka): bool
     {
-        $korisnickoIme = trim($korisnickoIme);
+        $korisnickoIme = mb_substr(mb_strtolower(trim($korisnickoIme)), 0, 50);
+
+        // Previše pogrešnih pokušaja za ovo ime ili sa ove adrese -> pauza
+        if ($this->prijavaNaPauzi($korisnickoIme)) {
+            return false;
+        }
 
         $stmt = $this->conn->prepare('SELECT id, lozinka_hash, ime_prezime, uloga FROM admini WHERE korisnicko_ime = ? LIMIT 1');
         $stmt->bind_param('s', $korisnickoIme);
@@ -27,7 +43,7 @@ class AdminAuth extends BaseAuth
 
         // Ista poruka za nepostojeće ime i pogrešnu lozinku
         if (!$row || !password_verify($lozinka, $row['lozinka_hash'])) {
-            $this->greska = 'Pogrešno korisničko ime ili lozinka.';
+            $this->neuspelaPrijava($korisnickoIme, 'Pogrešno korisničko ime ili lozinka.');
             return false;
         }
 
@@ -35,6 +51,7 @@ class AdminAuth extends BaseAuth
         $_SESSION['admin_id'] = (int)$row['id'];
         $_SESSION['admin_uloga'] = $row['uloga'];
         $_SESSION['admin_ime'] = $row['ime_prezime'];
+        $this->uspesnaPrijava($korisnickoIme);
         return true;
     }
 
@@ -43,13 +60,15 @@ class AdminAuth extends BaseAuth
      */
     public function logout(): void
     {
-        unset($_SESSION['admin_id'], $_SESSION['admin_uloga'], $_SESSION['admin_ime']);
+        unset($_SESSION['admin_id'], $_SESSION['admin_uloga'], $_SESSION['admin_ime'],
+            $_SESSION[$this->kljucAktivnosti()]);
         session_regenerate_id(true);
     }
 
+    /** Prijavljen je i nije predugo neaktivan (posle NEAKTIVNOST_MIN minuta sledi odjava) */
     public function check(): bool
     {
-        return !empty($_SESSION['admin_id']);
+        return !empty($_SESSION['admin_id']) && $this->aktivnaSesija();
     }
 
     public function adminId(): ?int

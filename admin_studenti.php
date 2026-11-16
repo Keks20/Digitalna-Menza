@@ -20,6 +20,8 @@
  * (ko živi u Kragujevcu i nije u domu – samo ručak); pravila su u src/Student.php.
  * Već kupljeni obroci se ne menjaju, nova pravila važe od sledeće kupovine.
  *
+ * Promena kategorije i blokiranje / odblokiranje kartice se upisuju u dnevnik akcija (admin_dnevnik.php).
+ *
  * Blokirana kartica ne može da se prijavi, dopuni, kupi obroke ni dobije obrok na kasi;
  * student koji je baš tada prijavljen biva odjavljen na sledećem kliku (includes/provera_prijave.php).
  *
@@ -48,6 +50,7 @@ require_once __DIR__ . '/src/StudentRepository.php';
 require_once __DIR__ . '/src/KarticaRepository.php';
 require_once __DIR__ . '/src/Format.php';
 require_once __DIR__ . '/src/Poruka.php';
+require_once __DIR__ . '/src/AdminDnevnikRepository.php';
 
 const PO_STRANI = 20;
 const MAKS_PRETRAGA = 100;
@@ -106,8 +109,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!isset($FINANSIRANJA[$finansiranje]) || !isset($PREBIVALISTA[$prebivaliste])) {
             Poruka::postavi('danger', 'Izaberi finansiranje i mesto stanovanja iz ponuđenih.');
         } else {
+            $staraKategorija = $izabrani->nazivKategorije();
             $studentRepo->postaviKategoriju((int)$izabrani->id, $finansiranje, $prebivaliste);
             $izabrani = $studentRepo->read((int)$izabrani->id);
+            (new AdminDnevnikRepository())->upisi($admin, 'kategorija', $izabrani->punoIme() . ' (' . $izabrani->broj_indeksa
+                . '): „' . $staraKategorija . '“ → „' . $izabrani->nazivKategorije() . '“.');
             Poruka::postavi('success', $izabrani->punoIme() . ': kategorija je sada „' . $izabrani->nazivKategorije()
                 . '“ – ' . ($izabrani->samoRucak() ? 'samo ručak' : 'sva tri obroka') . ', '
                 . ($izabrani->jeSamofinansirajuci() ? 'trostruka cena.' : 'osnovna cena.'));
@@ -127,6 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $opis = 'Kartica ' . $kartica->formatiranBroj() . ' (' . $student->punoIme() . ')';
         if ($karticaRepo->postaviStatus($karticaId, $noviStatus)) {
+            (new AdminDnevnikRepository())->upisi($admin, 'kartica', $opis
+                . ($noviStatus === 'blokirana' ? ' je blokirana.' : ' je odblokirana.'));
             Poruka::postavi('success', $opis . ($noviStatus === 'blokirana'
                 ? ' je blokirana. Student ne može da se prijavi, dopuni karticu, kupi obroke ni dobije obrok na kasi.'
                 : ' je ponovo aktivna.'));
