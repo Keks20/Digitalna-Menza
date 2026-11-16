@@ -219,6 +219,7 @@ class TransakcijaRepository extends BaseRepository
     /**
      * Uplata koja ne menja stanje: 'ceka_potvrdu' (IPS uplata dok banka ne javi)
      * ili 'odbijeno' (banka odbila karticu). Vraća id transakcije.
+     * Uplata koja čeka potvrdu ističe posle ROK_IPS_MIN minuta (oznaciIstekleUplate()).
      */
     public function zabeleziUplatu(int $karticaId, float $iznos, string $nacin, string $status, string $opis): int
     {
@@ -243,12 +244,15 @@ class TransakcijaRepository extends BaseRepository
         $this->conn->begin_transaction();
         try {
             // FOR UPDATE zaključava red, pa dva istovremena klika ne mogu dvaput da dodaju novac
+            // Uplata kojoj je prošao rok se ne potvrđuje, i kad još nije označena kao istekla
+            $rok = self::ROK_IPS_MIN;
             $stmt = $this->conn->prepare(
                 "SELECT kartica_id, iznos FROM transakcije
                  WHERE id = ? AND tip = 'uplata' AND status = 'ceka_potvrdu'
+                   AND kreirano > NOW() - INTERVAL ? MINUTE
                  FOR UPDATE"
             );
-            $stmt->bind_param('i', $id);
+            $stmt->bind_param('ii', $id, $rok);
             $stmt->execute();
             $row = $stmt->get_result()->fetch_assoc();
             if (!$row) {
@@ -280,6 +284,27 @@ class TransakcijaRepository extends BaseRepository
         $stmt->bind_param('i', $id);
         $stmt->execute();
         return $stmt->affected_rows === 1;
+    }
+
+    /** Koliko minuta IPS uplata čeka potvrdu banke pre nego što istekne */
+    public const ROK_IPS_MIN = 30;
+
+    /**
+     * Uplate koje čekaju potvrdu duže od ROK_IPS_MIN minuta dobijaju status 'isteklo'.
+     * Stanje kartice se ne menja, jer novac za takvu uplatu nikad nije dodat.
+     * Poziva se pri svakom otvaranju stranice (includes/provera_prijave.php i provera_admina.php),
+     * pa liste uplata nikad ne prikazuju uplatu koja čeka duže od roka. Vraća broj isteklih.
+     */
+    public function oznaciIstekleUplate(): int
+    {
+        $rok = self::ROK_IPS_MIN;
+        $stmt = $this->conn->prepare(
+            "UPDATE transakcije SET status = 'isteklo'
+             WHERE tip = 'uplata' AND status = 'ceka_potvrdu' AND kreirano <= NOW() - INTERVAL ? MINUTE"
+        );
+        $stmt->bind_param('i', $rok);
+        $stmt->execute();
+        return $stmt->affected_rows;
     }
 
     // =================================================================
@@ -390,7 +415,7 @@ class TransakcijaRepository extends BaseRepository
 
     /**
      * Uplate svih studenata za administratora, najnovije prve.
-     * Uslovi: ['status' => 'ceka_potvrdu' | 'odbijeno' | 'uspesno' | '', 'pretraga' => ime, broj kartice ili broj transakcije, 'limit' => 50]
+     * Uslovi: ['status' => 'ceka_potvrdu' | 'odbijeno' | 'isteklo' | 'uspesno' | '', 'pretraga' => ime, broj kartice ili broj transakcije, 'limit' => 50]
      */
     public function uplateZaAdmina(array $conditions = []): array
     {

@@ -9,14 +9,18 @@
  *                                {"tekst": "DM1.1.2.1793915376.a1b2c3d4e5f6a7b8", "osvezi": 60}
  *                                ili {"greska": "..."} (HTTP 409) kad tog obroka više nema
  *
- * Bon se pravi samo za obrok kojeg student još ima u ovom mesecu (vidi src/Bon.php).
+ * Bon se pravi samo za obrok kojeg student još ima u ovom mesecu (vidi src/Bon.php) i na koji njegova
+ * kategorija ima pravo. Student koji je prebačen u kategoriju "Kragujevac" (samo ručak) ne dobija bon za
+ * ranije kupljene doručke i večere – kasa ih ne izdaje, a novac za njih mu se refundira.
  *
  * Prikaz dobija:
  *   $student          Student
  *   $kartica          Kartica        formatiranBroj()
  *   $nazivMeseca      string         npr. 'novembar 2026'
  *   $vaziDo           string         npr. '30.11.2026.' (poslednji dan meseca)
- *   $obroci           array          po tipu: [['tip_obroka_id' => 2, 'naziv' => 'Ručak', 'kupljeno' => 10, 'iskorisceno' => 3, 'preostalo' => 7], ...]
+ *   $obroci           array          po tipu: [['tip_obroka_id' => 2, 'naziv' => 'Ručak', 'kupljeno' => 10, 'iskorisceno' => 3, 'preostalo' => 7,
+ *                                    'dozvoljen' => true (false = kategorija studenta nema pravo na taj obrok)], ...]
+ *   $zaRefundaciju    int            koliko preostalih obroka student više ne može da iskoristi (čekaju refundaciju)
  *   $ukupnoKupljeno   int            zbir za ceo mesec (npr. "21 od 30")
  *   $ukupnoPreostalo  int
  *   $izabraniTip      int|null       id tipa obroka za koji je bon (null = nijednog obroka nema)
@@ -35,8 +39,21 @@ require_once __DIR__ . '/src/Format.php';
 
 $mesec = date('Y-m-01');
 $kupljeniRepo = new KupljeniObrokRepository();
+$student = (new StudentRepository())->read($studentId);
+
 $obroci = $kupljeniRepo->stanjeZaMesec($karticaId, $mesec);
+$zaRefundaciju = 0;
+foreach ($obroci as &$obrok) {
+    $obrok['dozvoljen'] = $student->smeDaKupi((int)$obrok['tip_obroka_id']);
+    if (!$obrok['dozvoljen']) {
+        $zaRefundaciju += (int)$obrok['preostalo'];
+    }
+}
+unset($obrok);
 $poTipu = array_column($obroci, null, 'tip_obroka_id');
+
+/** Bon postoji samo za obrok kojeg još ima i na koji kategorija studenta ima pravo */
+$imaBon = fn(int $tipId): bool => isset($poTipu[$tipId]) && $poTipu[$tipId]['preostalo'] > 0 && $poTipu[$tipId]['dozvoljen'];
 
 // ---------- Osvežavanje bona (poziva js/bon_qr.js) ----------
 if (isset($_GET['bon'])) {
@@ -44,7 +61,7 @@ if (isset($_GET['bon'])) {
     header('Cache-Control: no-store');
 
     $tipId = (int)$_GET['bon'];
-    if (($poTipu[$tipId]['preostalo'] ?? 0) < 1) {
+    if (!$imaBon($tipId)) {
         http_response_code(409);
         echo json_encode(['greska' => 'Nema više obroka ove vrste za ovaj mesec.'], JSON_UNESCAPED_UNICODE);
         exit;
@@ -57,23 +74,22 @@ if (isset($_GET['bon'])) {
 $ukupnoKupljeno = array_sum(array_column($obroci, 'kupljeno'));
 $ukupnoPreostalo = array_sum(array_column($obroci, 'preostalo'));
 
-// Izabrani obrok: iz adrese, inače prvi kojeg još ima
+// Izabrani obrok: iz adrese, inače prvi za koji postoji bon
 $izabraniTip = isset($_GET['tip']) && isset($poTipu[(int)$_GET['tip']]) ? (int)$_GET['tip'] : null;
 if ($izabraniTip === null) {
     foreach ($obroci as $o) {
-        if ($o['preostalo'] > 0) {
+        if ($imaBon((int)$o['tip_obroka_id'])) {
             $izabraniTip = (int)$o['tip_obroka_id'];
             break;
         }
     }
 }
 
-$bonTekst = ($izabraniTip !== null && $poTipu[$izabraniTip]['preostalo'] > 0)
+$bonTekst = ($izabraniTip !== null && $imaBon($izabraniTip))
     ? Bon::napravi($karticaId, $izabraniTip)
     : null;
 $bonOsvezavanje = Bon::OSVEZAVANJE;
 
-$student = (new StudentRepository())->read($studentId);
 $kartica = (new KarticaRepository())->read($karticaId);
 $nazivMeseca = Format::mesecGodina($mesec);
 $vaziDo = date('t.m.Y.');

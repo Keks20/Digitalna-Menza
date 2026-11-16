@@ -24,6 +24,7 @@ $OZNAKA_TIPA = ['uplata' => 'tag-green', 'obroci' => 'tag-blue', 'smestaj' => 't
 $OZNAKA_STATUSA = [
     'ceka_potvrdu' => 'tag-orange',
     'odbijeno' => 'tag-red',
+    'isteklo' => 'tag-gray',
 ];
 
 $period = Format::datum($od) . ' – ' . Format::datum($do);
@@ -160,7 +161,7 @@ $poslednjaNaStrani = ($strana - 1) * $poStrani + count($transakcije);
             <div class="tx-col-tip">
               <span class="tag ms-0 <?php echo $OZNAKA_TIPA[$t->tip] ?? 'tag-gray'; ?>"><?php echo Format::tipTransakcije($t->tip); ?></span>
             </div>
-            <div class="tx-amount <?php echo $klasaIznosa; ?><?php echo $t->status === 'odbijeno' ? ' tx-strike' : ''; ?>">
+            <div class="tx-amount <?php echo $klasaIznosa; ?><?php echo in_array($t->status, ['odbijeno', 'isteklo'], true) ? ' tx-strike' : ''; ?>">
               <?php echo Format::novac($t->iznos, true); ?>
             </div>
             <div class="tx-col-stanje tx-balance">

@@ -115,13 +115,14 @@ class Format
         return $nazivi[$nacin] ?? $nacin;
     }
 
-    /** 'uspesno' -> "Uspešno", 'ceka_potvrdu' -> "Čeka potvrdu", 'odbijeno' -> "Odbijeno" */
+    /** 'uspesno' -> "Uspešno", 'ceka_potvrdu' -> "Čeka potvrdu", 'odbijeno' -> "Odbijeno", 'isteklo' -> "Isteklo" */
     public static function statusTransakcije(string $status): string
     {
         $nazivi = [
             'uspesno' => 'Uspešno',
             'ceka_potvrdu' => 'Čeka potvrdu',
             'odbijeno' => 'Odbijeno',
+            'isteklo' => 'Isteklo',
         ];
         return $nazivi[$status] ?? $status;
     }

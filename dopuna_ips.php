@@ -6,6 +6,7 @@
  * Pri prvom otvaranju upisuje se uplata sa statusom 'ceka_potvrdu' (stanje se još ne menja).
  * Novac stiže na karticu kad banka javi da je uplata stigla – u prototipu je to dugme
  * "Simuliraj prijem uplate". Administrator uplate samo vidi u listi (admin_uplate.php), ne potvrđuje ih.
+ * Uplata koja se ne potvrdi za 30 minuta ističe (status 'isteklo') i student vidi to na dopuna_uspesno.php.
  *
  * POST "akcija":
  *   simuliraj  – potvrđuje uplatu -> dopuna_uspesno.php?id=...
@@ -17,6 +18,8 @@
  *   $podaciZaUplatu      array    ['primalac', 'racun', 'iznos', 'sifra', 'poziv_na_broj', 'svrha']
  *   $ipsQrTekst          string   tekst za QR kod (NBS IPS format)
  *   $transakcijaId       int      broj uplate koja čeka
+ *   $vaziDo              string   do kada banka može da potvrdi uplatu, npr. '15:42'
+ *   $rokMinuta           int      koliko minuta uplata čeka potvrdu (30)
  *   $greska              string
  *   $csrfToken           string
  */
@@ -47,7 +50,7 @@ if ($transakcijaId === 0) {
     Dopuna::postaviTransakciju($transakcijaId);
 }
 
-// Ako uplata u međuvremenu više ne čeka (potvrđena ili otkazana u drugoj kartici pregledača), dopuna je završena
+// Ako uplata u međuvremenu više ne čeka (potvrđena, otkazana u drugoj kartici pregledača ili istekla), dopuna je završena
 $uplata = $transakcije->read($transakcijaId);
 if (!$uplata || (int)$uplata->kartica_id !== $karticaId || $uplata->status !== 'ceka_potvrdu') {
     Dopuna::zavrsi();
@@ -67,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$auth->validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $greska = 'Sesija je istekla. Osveži stranicu i pokušaj ponovo.';
     } elseif ($akcija === 'simuliraj') {
+        // Ako je rok baš sada prošao, potvrda ne uspeva i sledeća stranica prikazuje isteklu uplatu
         $transakcije->potvrdiUplatu($transakcijaId);
         Dopuna::zavrsi();
         header('Location: dopuna_uspesno.php?id=' . $transakcijaId);
@@ -82,6 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $podaciZaUplatu = IpsQr::podaci($iznos, $kartica->broj_kartice);
 $ipsQrTekst = IpsQr::tekst($iznos, $kartica->broj_kartice);
+$rokMinuta = TransakcijaRepository::ROK_IPS_MIN;
+$vaziDo = date('H:i', strtotime($uplata->kreirano) + $rokMinuta * 60);
 $csrfToken = $auth->generateCsrfToken();
 
 require __DIR__ . '/views/dopuna_ips.view.php';

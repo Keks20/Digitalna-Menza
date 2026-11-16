@@ -2,7 +2,7 @@
 /**
  * PRIKAZ: potvrda uplate posle dopune (izgled po Figmi – ekran "Dopuna-uspesno").
  *
- * Isti ekran za sva stanja uplate: uspešna, čeka potvrdu (IPS), odbijena i refundirana.
+ * Isti ekran za sva stanja uplate: uspešna, čeka potvrdu (IPS), odbijena, istekla (IPS) i refundirana.
  * Uspešna uplata ima dugme "Refundiraj uplatu" dok važi rok i dok novac nije potrošen.
  * "Preuzmi potvrdu (PDF)" otvara štampu, a odatle se bira "Sačuvaj kao PDF".
  * Spisak promenljivih je na vrhu dopuna_uspesno.php.
@@ -25,6 +25,10 @@ $stanja = [
     'odbijeno' => [
         'naslov' => 'Uplata nije prošla', 'strana' => 'Uplata nije prošla', 'ikonica' => 'iks', 'boja' => 'result-red',
         'tekst' => 'Novac nije dodat na karticu. Možeš da pokušaš ponovo.',
+    ],
+    'isteklo' => [
+        'naslov' => 'Uplata je istekla', 'strana' => 'Uplata istekla', 'ikonica' => 'sat', 'boja' => 'result-orange',
+        'tekst' => 'Banka nije potvrdila IPS uplatu na vreme, pa novac nije dodat na karticu. Možeš da pokušaš ponovo.',
     ],
 ];
 $s = $stanja[$uplata->status];
@@ -73,7 +77,7 @@ if ($uplata->refundirano !== null) {
 
       <div class="d-flex flex-wrap gap-2 gap-lg-3 mt-4 no-print">
         <a href="pocetna.php" class="btn btn-primary btn-app btn-app-lg flex-fill">Nazad na početnu</a>
-        <?php if ($uplata->status === 'odbijeno' || $uplata->refundirano !== null): ?>
+        <?php if (in_array($uplata->status, ['odbijeno', 'isteklo'], true) || $uplata->refundirano !== null): ?>
           <a href="dopuna.php" class="btn btn-app btn-app-outline btn-app-lg flex-fill"><?php echo $uplata->refundirano !== null ? 'Nova dopuna' : 'Pokušaj ponovo'; ?></a>
         <?php else: ?>
           <button type="button" class="btn btn-app btn-app-outline btn-app-lg flex-fill" onclick="window.print()">

@@ -14,7 +14,8 @@
  * Na stranici bez $zvonce (kviz) zvonce je običan link na obavestenja.php.
  * Krug sa inicijalima i ime vode na profil.
  *
- * Zaposleni: zvonce bez liste; $imaObavestenja (bool, podrazumevano true) određuje narandžastu tačkicu.
+ * Zaposleni: administrator ima zvonce koje vodi na uplate koje čekaju potvrdu, sa njihovim brojem
+ * ($zvonceAdmina['na_cekanju'] iz includes/provera_admina.php). Kasir nema zvonce.
  *
  * Upotreba u view fajlu (unutar <header class="page-header ...">):
  *   <?php require __DIR__ . '/delovi/korisnik.php'; ?>
@@ -39,7 +40,7 @@ if ($jeStudent) {
     $inicijaliKorisnika = $admin->inicijali();
     $podnaslovKorisnika = $admin->nazivUloge() . ' · SC Kragujevac';
     $slikaKorisnika = null;
-    $imaObavestenja = $imaObavestenja ?? true;
+    $uplataNaCekanju = isset($zvonceAdmina) ? (int)$zvonceAdmina['na_cekanju'] : null;
 }
 
 $imaZvonce = $jeStudent && isset($zvonce);
@@ -99,11 +100,15 @@ if ($imaZvonce) {
           </div>
         <?php elseif ($jeStudent): ?>
           <a href="obavestenja.php" class="btn-bell" aria-label="Obaveštenja"><?php echo ikonica('zvono'); ?></a>
-        <?php else: ?>
-          <button type="button" class="btn-bell" aria-label="Obaveštenja">
+        <?php elseif ($uplataNaCekanju !== null): ?>
+          <a href="admin_uplate.php?status=ceka_potvrdu" class="btn-bell"
+             title="<?php echo $uplataNaCekanju > 0 ? 'Uplate koje čekaju potvrdu: ' . $uplataNaCekanju : 'Nema uplata koje čekaju potvrdu'; ?>"
+             aria-label="<?php echo $uplataNaCekanju > 0 ? 'Uplate koje čekaju potvrdu: ' . $uplataNaCekanju : 'Nema uplata koje čekaju potvrdu'; ?>">
             <?php echo ikonica('zvono'); ?>
-            <?php if ($imaObavestenja): ?><span class="bell-dot"></span><?php endif; ?>
-          </button>
+            <?php if ($uplataNaCekanju > 0): ?>
+              <span class="bell-count"><?php echo $uplataNaCekanju > ZVONCE_NAJVISE ? ZVONCE_NAJVISE . '+' : $uplataNaCekanju; ?></span>
+            <?php endif; ?>
+          </a>
         <?php endif; ?>
 
         <?php if ($jeStudent): ?>

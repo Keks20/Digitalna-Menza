@@ -92,6 +92,7 @@ CREATE TABLE jelovnik (
 
 -- Svaka promena stanja kartice. iznos je + za uplatu, - za obroke, smeštaj i refundaciju uplate.
 -- Na stanje utiču samo transakcije sa statusom 'uspesno'.
+-- IPS uplata koja čeka potvrdu duže od 30 minuta dobija status 'isteklo'.
 -- refundirano: kada je uplata vraćena studentu (tada postoji i red tipa 'refundacija' sa istim iznosom u minusu).
 CREATE TABLE transakcije (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -100,7 +101,7 @@ CREATE TABLE transakcije (
   nacin ENUM('platna_kartica','ips_qr','kartica') NOT NULL,
   iznos DECIMAL(10,2) NOT NULL,
   stanje_posle DECIMAL(10,2) NULL,
-  status ENUM('uspesno','ceka_potvrdu','odbijeno') NOT NULL DEFAULT 'uspesno',
+  status ENUM('uspesno','ceka_potvrdu','odbijeno','isteklo') NOT NULL DEFAULT 'uspesno',
   opis VARCHAR(255) NOT NULL,
   refundirano DATETIME NULL,
   kreirano DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

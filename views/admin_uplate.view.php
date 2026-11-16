@@ -21,6 +21,7 @@ $BOJE_STATUSA = [
     'uspesno' => 'tag-green',
     'ceka_potvrdu' => 'tag-orange',
     'odbijeno' => 'tag-red',
+    'isteklo' => 'tag-gray',
 ];
 
 // Kratak naziv načina plaćanja za usku kolonu
@@ -242,7 +243,8 @@ $KRATAK_NACIN = [
             <?php if (count($uplate) >= BROJ_UPLATA): ?>
               Prikazano je poslednjih <?php echo BROJ_UPLATA; ?> uplata – za starije koristi pretragu.<br />
             <?php endif; ?>
-            Uplate su samo za pregled – IPS uplatu potvrđuje banka, a student može da refundira uplatu u roku od sat vremena.<br />
+            Uplate su samo za pregled – IPS uplatu potvrđuje banka (ako potvrda ne stigne za <?php echo (int)$rokIpsMinuta; ?> minuta, uplata ističe),
+            a student može da refundira uplatu u roku od sat vremena.<br />
             Danas: <strong><?php echo $uplateDanas['broj']; ?> uspešnih uplata</strong> · <?php echo Format::novac($uplateDanas['zbir']); ?>
           </p>
         </section>

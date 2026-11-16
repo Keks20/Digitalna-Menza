@@ -3,7 +3,8 @@
  * LOGIKA: pregled uplata studenata i obaveštenja (samo administrator).
  *
  * Uplate su samo lista (filter i pretraga): administrator ih ne potvrđuje i ne odbija.
- * IPS uplatu potvrđuje banka (u prototipu simulacija na dopuna_ips.php), a student sam može
+ * IPS uplatu potvrđuje banka (u prototipu simulacija na dopuna_ips.php); ako potvrda ne stigne
+ * za 30 minuta, uplata dobija status 'isteklo'. Student sam može
  * da refundira uplatu u roku od sat vremena (refundacija.php).
  * Izgled je u views/admin_uplate.view.php.
  *
@@ -21,11 +22,12 @@
  *   $admin         Admin        prijavljeni administrator
  *   $uplate        array        uplate: ['id', 'kreirano', 'ime', 'prezime', 'broj_kartice', 'nacin', 'iznos', 'status',
  *                               'refundirano' (datum i vreme kad je student refundirao uplatu, ili null)]
- *   $filterStatus  string       '' (sve) | 'ceka_potvrdu' | 'odbijeno' | 'uspesno'
+ *   $filterStatus  string       '' (sve) | 'ceka_potvrdu' | 'odbijeno' | 'isteklo' | 'uspesno'
  *   $pretraga      string       tekst iz polja za pretragu
  *   $FILTERI       array        ['' => 'Sve', 'ceka_potvrdu' => 'Čeka potvrdu', ...] za dugmad filtera
  *   $uplateDanas   array        ['broj' => 47, 'zbir' => 48500.0] uspešne uplate danas
  *   $brojNaCekanju int          koliko IPS uplata čeka potvrdu banke (za značku)
+ *   $rokIpsMinuta  int          posle koliko minuta čekanja IPS uplata ističe (30)
  *   adminUplateUrl(status, q)   funkcija – link za filter (zadržava pretragu)
  *   $menze         array        [['id', 'naziv', ...], ...] za izbor menze
  *   $domovi        string[]     ['Dom 1', ...] za izbor doma
@@ -57,6 +59,7 @@ $FILTERI = [
     '' => 'Sve',
     'ceka_potvrdu' => 'Čeka potvrdu',
     'odbijeno' => 'Odbijeno',
+    'isteklo' => 'Isteklo',
     'uspesno' => 'Uspešno',
 ];
 
@@ -201,6 +204,7 @@ $obavestenja = $obavestenjeRepo->list(['limit' => BROJ_U_LISTI]);
 $uplate = $transakcijaRepo->uplateZaAdmina(['status' => $filterStatus, 'pretraga' => $pretraga, 'limit' => BROJ_UPLATA]);
 $uplateDanas = $transakcijaRepo->uplateZaDan(date('Y-m-d'));
 $brojNaCekanju = $transakcijaRepo->brojUplataNaCekanju();
+$rokIpsMinuta = TransakcijaRepository::ROK_IPS_MIN;
 
 $poruka = Poruka::uzmi();
 

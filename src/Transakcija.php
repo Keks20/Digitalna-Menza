@@ -8,7 +8,7 @@ class Transakcija
     public $nacin;        // platna_kartica | ips_qr | kartica
     public $iznos;        // + uplata, - obroci, smeštaj i refundacija
     public $stanje_posle;
-    public $status;       // uspesno | ceka_potvrdu | odbijeno
+    public $status;       // uspesno | ceka_potvrdu | odbijeno | isteklo
     public $opis;
     public $refundirano;  // kada je uplata vraćena studentu (null = nije)
     public $kreirano;

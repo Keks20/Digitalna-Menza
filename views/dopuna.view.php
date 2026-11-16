@@ -140,7 +140,7 @@ $naciniPlacanja = [
                 <?php if ($refundirana): ?>
                   <span class="tag tag-gray">Refundirano</span>
                 <?php elseif (!$uspesna): ?>
-                  <span class="tag <?php echo $u['status'] === 'odbijeno' ? 'tag-red' : 'tag-orange'; ?>"><?php echo Format::statusTransakcije($u['status']); ?></span>
+                  <span class="tag <?php echo ['odbijeno' => 'tag-red', 'isteklo' => 'tag-gray'][$u['status']] ?? 'tag-orange'; ?>"><?php echo Format::statusTransakcije($u['status']); ?></span>
                 <?php elseif (isset($refundabilne[$u['id']])): ?>
                   <a href="dopuna_uspesno.php?id=<?php echo (int)$u['id']; ?>" class="panel-link"
                      title="Refundacija je moguća do <?php echo date('H:i', strtotime($refundabilne[$u['id']])); ?>">Refundiraj</a>
