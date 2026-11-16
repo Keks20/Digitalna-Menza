@@ -42,6 +42,7 @@ $prodatoTrend = $promena($prodatoPromena);
 $ostaleSekcije = [
     ['fajl' => 'admin_smestaj.php',  'naziv' => 'Smeštaj',  'ikonica' => 'kuca',     'boja' => 'tint-blue'],
     ['fajl' => 'admin_studenti.php', 'naziv' => 'Studenti', 'ikonica' => 'studenti', 'boja' => 'tint-green'],
+    ['fajl' => 'admin_dnevnik.php',  'naziv' => 'Dnevnik',  'ikonica' => 'istorija', 'boja' => 'tint-orange'],
 ];
 
 // Najviši stubić zauzima celu visinu grafikona; ostali srazmerno
@@ -180,7 +181,7 @@ $najviseIzdato = max(1, max(array_column($poslednjihSedam, 'izdato') ?: [0]));
       <?php endif; ?>
     </section>
 
-    <!-- Na telefonu donja traka nema Smeštaj i Studente, pa su ovde -->
+    <!-- Na telefonu donja traka nema Smeštaj, Studente i Dnevnik, pa su ovde -->
     <nav class="row g-3 mt-0 d-lg-none" aria-label="Ostale sekcije">
       <?php foreach ($ostaleSekcije as $sekcija): ?>
         <div class="col-6">

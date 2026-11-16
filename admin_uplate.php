@@ -17,6 +17,7 @@
  *   izmeni   – izmena postojećeg obaveštenja (polje id)
  *   obrisi   – brisanje obaveštenja (polje id)
  * Posle uspeha preusmeravanje nazad (Post/Redirect/Get), filter uplata ostaje isti.
+ * Objava, izmena i brisanje obaveštenja se upisuju u dnevnik akcija (admin_dnevnik.php).
  *
  * Prikaz dobija:
  *   $admin         Admin        prijavljeni administrator
@@ -49,6 +50,7 @@ require_once __DIR__ . '/src/SmestajRepository.php';
 require_once __DIR__ . '/src/TransakcijaRepository.php';
 require_once __DIR__ . '/src/Format.php';
 require_once __DIR__ . '/src/Poruka.php';
+require_once __DIR__ . '/src/AdminDnevnikRepository.php';
 
 const MAKS_NASLOV = 150;    // kolona obavestenja.naslov je VARCHAR(150)
 const MAKS_TEKST = 2000;
@@ -86,6 +88,7 @@ $NAZIVI_GRUPA = [
 ];
 
 $obavestenjeRepo = new ObavestenjeRepository();
+$dnevnikRepo = new AdminDnevnikRepository();
 $menze = (new MenzaRepository())->list();
 $domovi = (new SmestajRepository())->domovi();
 
@@ -109,8 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($akcija === 'obrisi') {
-        if ($id > 0 && $obavestenjeRepo->read($id)) {
+        $zaBrisanje = $id > 0 ? $obavestenjeRepo->read($id) : null;
+        if ($zaBrisanje) {
             $obavestenjeRepo->delete($id);
+            $dnevnikRepo->upisi($admin, 'obavestenje', 'Obrisano obaveštenje „' . $zaBrisanje->naslov . '“.');
             Poruka::postavi('success', 'Obaveštenje je obrisano.');
         } else {
             Poruka::postavi('danger', 'Obaveštenje ne postoji.');
@@ -166,9 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             if ($akcija === 'izmeni') {
                 $obavestenjeRepo->update($id, $podaci);
+                $dnevnikRepo->upisi($admin, 'obavestenje', 'Izmenjeno obaveštenje „' . $forma['naslov'] . '“.');
                 Poruka::postavi('success', 'Obaveštenje je izmenjeno.');
             } else {
                 $obavestenjeRepo->create($podaci);
+                $dnevnikRepo->upisi($admin, 'obavestenje', 'Objavljeno obaveštenje „' . $forma['naslov'] . '“ ('
+                    . mb_strtolower($NAZIVI_GRUPA[$forma['ciljna_grupa']]) . ').');
                 Poruka::postavi('success', 'Obaveštenje je objavljeno – studenti ga vide na početnoj.');
             }
             header('Location: ' . $nazad);

@@ -9,4 +9,7 @@ return [
     'db_pass' => '',
     // Tajni ključ za potpis QR bonova (na pravom serveru obavezno drugačiji, u config.local.php)
     'qr_tajna' => 'digitalna-menza-razvoj-2026',
+    // false: korisnik umesto PHP greške vidi stranu za greške, a greška se upisuje u PHP dnevnik (src/Greske.php).
+    // true (samo u config.local.php, dok se programira): greške se ispisuju na stranici.
+    'prikazi_greske' => false,
 ];

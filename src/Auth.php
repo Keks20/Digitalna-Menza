@@ -4,14 +4,29 @@ require_once __DIR__ . '/BaseAuth.php';
 
 /**
  * Prijava studenta brojem studentske kartice i lozinkom.
- * Sesija i CSRF zaštita su nasleđeni iz BaseAuth.
+ * Sesija, CSRF zaštita, ograničenje pokušaja prijave i odjava posle neaktivnosti su nasleđeni iz BaseAuth.
  */
 class Auth extends BaseAuth
 {
+    protected function kljucAktivnosti(): string
+    {
+        return 'student_aktivnost';
+    }
+
+    protected function vrstaPrijave(): string
+    {
+        return 'student';
+    }
+
     public function login(string $brojKartice, string $lozinka): bool
     {
         // Prihvatamo i "0012 3456 7890" i "001234567890"
-        $brojKartice = preg_replace('/\D/', '', $brojKartice);
+        $brojKartice = substr(preg_replace('/\D/', '', $brojKartice), 0, 50);
+
+        // Previše pogrešnih pokušaja za ovu karticu ili sa ove adrese -> pauza
+        if ($this->prijavaNaPauzi($brojKartice)) {
+            return false;
+        }
 
         $stmt = $this->conn->prepare(
             'SELECT k.id AS kartica_id, k.lozinka_hash, k.status, s.id AS student_id, s.ime, s.prezime
@@ -27,7 +42,7 @@ class Auth extends BaseAuth
         // Ista poruka i za nepostojeću karticu i za pogrešnu lozinku,
         // da napadač ne može da sazna koji brojevi kartica postoje.
         if (!$row || !password_verify($lozinka, $row['lozinka_hash'])) {
-            $this->greska = 'Pogrešan broj kartice ili lozinka.';
+            $this->neuspelaPrijava($brojKartice, 'Pogrešan broj kartice ili lozinka.');
             return false;
         }
 
@@ -42,6 +57,7 @@ class Auth extends BaseAuth
         $_SESSION['kartica_id'] = (int)$row['kartica_id'];
         $_SESSION['ime'] = $row['ime'];
         $_SESSION['prezime'] = $row['prezime'];
+        $this->uspesnaPrijava($brojKartice);
         return true;
     }
 
@@ -50,13 +66,15 @@ class Auth extends BaseAuth
      */
     public function logout(): void
     {
-        unset($_SESSION['student_id'], $_SESSION['kartica_id'], $_SESSION['ime'], $_SESSION['prezime']);
+        unset($_SESSION['student_id'], $_SESSION['kartica_id'], $_SESSION['ime'], $_SESSION['prezime'],
+            $_SESSION[$this->kljucAktivnosti()]);
         session_regenerate_id(true);
     }
 
+    /** Prijavljen je i nije predugo neaktivan (posle NEAKTIVNOST_MIN minuta sledi odjava) */
     public function check(): bool
     {
-        return !empty($_SESSION['student_id']);
+        return !empty($_SESSION['student_id']) && $this->aktivnaSesija();
     }
 
     public function studentId(): ?int

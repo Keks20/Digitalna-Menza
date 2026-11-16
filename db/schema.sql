@@ -220,6 +220,38 @@ CREATE TABLE kviz_rezultati (
   broj_tacnih TINYINT UNSIGNED NOT NULL,
   ukupno TINYINT UNSIGNED NOT NULL,
   trajanje_sek INT UNSIGNED NOT NULL,
+  ip VARCHAR(45) NULL COMMENT 'adresa sa koje je kviz poslat (ograničenje broja slanja)',
   kreirano DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_kviz_student FOREIGN KEY (student_id) REFERENCES studenti(id) ON DELETE SET NULL
+  CONSTRAINT fk_kviz_student FOREIGN KEY (student_id) REFERENCES studenti(id) ON DELETE SET NULL,
+  INDEX idx_kviz_ip (ip, kreirano)
+) ENGINE=InnoDB;
+
+-- ---------- Bezbednost ----------
+
+-- Neuspešne prijave studenata i zaposlenih. Posle 5 pogrešnih pokušaja za isti nalog
+-- (ili 20 sa iste adrese) u 10 minuta prijava se zaustavlja na 10 minuta (src/PokusajiPrijave.php).
+-- korisnik: broj kartice (samo cifre) ili korisničko ime zaposlenog, onako kako je upisano.
+CREATE TABLE pokusaji_prijave (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  vrsta ENUM('student','zaposleni') NOT NULL,
+  korisnik VARCHAR(50) NOT NULL,
+  ip VARCHAR(45) NOT NULL,
+  vreme DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_pokusaji_korisnik (vrsta, korisnik, vreme),
+  INDEX idx_pokusaji_ip (ip, vreme)
+) ENGINE=InnoDB;
+
+-- Dnevnik akcija zaposlenih: ko je, kada i šta uradio (prijava, kartica, kategorija, cene, obaveštenja, zaduženja).
+-- admin_ime se pamti u redu, pa zapis ostaje čitljiv i kad se nalog zaposlenog obriše.
+CREATE TABLE admin_dnevnik (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id INT UNSIGNED NULL,
+  admin_ime VARCHAR(100) NOT NULL,
+  akcija VARCHAR(30) NOT NULL,
+  opis VARCHAR(255) NOT NULL,
+  ip VARCHAR(45) NOT NULL,
+  vreme DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_dnevnik_admin FOREIGN KEY (admin_id) REFERENCES admini(id) ON DELETE SET NULL,
+  INDEX idx_dnevnik_vreme (vreme),
+  INDEX idx_dnevnik_akcija (akcija, vreme)
 ) ENGINE=InnoDB;

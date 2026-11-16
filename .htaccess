@@ -1,0 +1,39 @@
+# Digitalna menza – podešavanja Apache servera za ceo sajt
+
+# Bez spiska fajlova kad folder nema početnu stranu
+Options -Indexes
+
+# Fajlovi koji nisu za pregledač: dokumentacija, SQL, dnevnici, podešavanja, Git
+<FilesMatch "\.(md|sql|log|ini|bak)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^(config(\.sample|\.local)?\.php|\.gitignore|\.gitattributes)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_alias.c>
+    RedirectMatch 404 "/\.(git|vscode|claude)(/|$)"
+</IfModule>
+
+# Strana za greške umesto podrazumevane strane servera.
+# Putanja kreće od korena servera; ako sajt nije u folderu /menza/, promeniti je i ovde.
+ErrorDocument 403 /menza/greska.php?kod=403
+ErrorDocument 404 /menza/greska.php?kod=404
+ErrorDocument 500 /menza/greska.php?kod=500
+
+# Bezbednosna zaglavlja uz svaki odgovor
+<IfModule mod_headers.c>
+    # Verzija PHP-a se ne objavljuje
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+    # Stranica ne sme da se prikaže u okviru (iframe) na drugom sajtu – zaštita od "clickjacking" napada
+    Header always set X-Frame-Options "DENY"
+    # Pregledač ne pogađa tip fajla, već koristi onaj koji server pošalje
+    Header always set X-Content-Type-Options "nosniff"
+    # Drugim sajtovima se ne šalje cela adresa stranice sa koje se dolazi
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Kamera samo za naš sajt (skeniranje QR bona na kasi); mikrofon i lokacija se ne koriste
+    Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+    # Odakle stranica sme da učitava sadržaj: naš sajt, Bootstrap i biblioteke sa jsdelivr / cdnjs, Google fontovi.
+    # 'unsafe-inline' ostaje dok postoje skripte i atributi (onsubmit, onclick, style) upisani u view fajlove.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+</IfModule>

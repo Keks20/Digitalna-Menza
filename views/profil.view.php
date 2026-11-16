@@ -137,6 +137,11 @@ $ispisGresaka = function (array $lista): void {
                 <input type="tel" class="form-control app-input" id="telefon" name="telefon" maxlength="20" autocomplete="tel" inputmode="tel"
                        value="<?php echo htmlspecialchars($forma['telefon']); ?>" placeholder="064 123 4567" />
               </div>
+              <div class="col-12">
+                <label for="lozinkaPotvrda" class="form-label">Trenutna lozinka <span class="profile-optional">(samo ako menjaš e-adresu)</span></label>
+                <input type="password" class="form-control app-input" id="lozinkaPotvrda" name="lozinka_potvrda"
+                       autocomplete="current-password" />
+              </div>
             </div>
             <p class="profile-hint">Na ove podatke Studentski centar šalje obaveštenja o kartici i smeštaju. Telefon nije obavezan.</p>
 

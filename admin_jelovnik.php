@@ -8,7 +8,8 @@
  * Forma šalje POST sa poljem "akcija":
  *   sacuvaj  – čuva jela za izabrani dan; dugme "objavi" (studenti vide) ili "nacrt" (U izmeni)
  *   kopiraj  – kopira jela iz prethodnog dana u izabrani dan, kao nacrt
- *   cene     – menja cene obroka (važe odmah; već kupljeni obroci zadržavaju staru cenu)
+ *   cene     – menja cene obroka (važe odmah; već kupljeni obroci zadržavaju staru cenu);
+ *              promena se upisuje u dnevnik akcija (admin_dnevnik.php)
  * Posle uspešnog čuvanja radi se preusmeravanje na isti dan (Post/Redirect/Get),
  * pa osvežavanje stranice ne šalje formu ponovo.
  *
@@ -42,6 +43,7 @@ require_once __DIR__ . '/src/JelovnikRepository.php';
 require_once __DIR__ . '/src/Format.php';
 require_once __DIR__ . '/src/Poruka.php';
 require_once __DIR__ . '/src/Kalendar.php';
+require_once __DIR__ . '/src/AdminDnevnikRepository.php';
 
 const BROJ_JELA = 3;          // toliko polja po obroku (kao u Figmi)
 const MAKS_DUZINA_JELA = 150; // kolona jelovnik.jelo je VARCHAR(150)
@@ -197,6 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($greske)) {
+            $promene = [];
             foreach ($tipoviObroka as $tip) {
                 if ($noveCene[$tip->id] !== $tip->cena) {
                     $tipRepo->update($tip->id, [
@@ -205,7 +208,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'vreme_od' => $tip->vreme_od,
                         'vreme_do' => $tip->vreme_do,
                     ]);
+                    $promene[] = $tip->naziv . ' ' . Format::cena($tip->cena) . ' → ' . Format::cena($noveCene[$tip->id]);
                 }
+            }
+            // U dnevnik akcija ide samo ono što je zaista promenjeno
+            if (!empty($promene)) {
+                (new AdminDnevnikRepository())->upisi($admin, 'cene', 'Nove cene obroka: ' . implode('; ', $promene) . '.');
             }
             Poruka::postavi('success', 'Cene su sačuvane i važe od sada. Već kupljeni obroci zadržavaju staru cenu.');
             header('Location: ' . $nazad);

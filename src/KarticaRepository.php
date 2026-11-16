@@ -73,15 +73,23 @@ class KarticaRepository extends BaseRepository
     }
 
     /**
-     * Promena lozinke iz profila: proverava staru lozinku pre upisa nove.
+     * Da li je ovo lozinka kartice – za potvrdu osetljivih izmena u profilu (lozinka, e-adresa).
      */
-    public function promeniLozinku(int $id, string $staraLozinka, string $novaLozinka): bool
+    public function proveriLozinku(int $id, string $lozinka): bool
     {
         $stmt = $this->conn->prepare('SELECT lozinka_hash FROM kartice WHERE id = ?');
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        if (!$row || !password_verify($staraLozinka, $row['lozinka_hash'])) {
+        return $row !== null && password_verify($lozinka, $row['lozinka_hash']);
+    }
+
+    /**
+     * Promena lozinke iz profila: proverava staru lozinku pre upisa nove.
+     */
+    public function promeniLozinku(int $id, string $staraLozinka, string $novaLozinka): bool
+    {
+        if (!$this->proveriLozinku($id, $staraLozinka)) {
             return false;
         }
 

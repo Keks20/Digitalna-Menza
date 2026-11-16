@@ -1,0 +1,50 @@
+/* =========================================================
+   Strana za greške (403, 404, 500) – views/greska.view.php
+   Učitava se posle style.css (.panel, .tint-box, .btn-app).
+   ========================================================= */
+
+.error-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: var(--bg);
+}
+
+.error-box {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 28px;
+}
+
+.error-box .tint-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+}
+
+.error-box .tint-box .ikonica {
+  width: 26px;
+  height: 26px;
+}
+
+.error-code {
+  margin: 18px 0 4px;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.error-title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.error-text {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 15px;
+}
