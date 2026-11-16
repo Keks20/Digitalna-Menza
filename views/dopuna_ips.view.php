@@ -64,7 +64,7 @@ $koraci = [
               </ol>
               <p class="ips-status d-flex flex-wrap align-items-center gap-2 mb-0">
                 <span class="tag tag-orange">Čeka se uplata</span>
-                <span>Uplata br. <?php echo (int)$transakcijaId; ?> · osveži stranicu da proveriš da li je stigla</span>
+                <span>Uplata br. <?php echo (int)$transakcijaId; ?> · važi do <?php echo htmlspecialchars($vaziDo); ?> (<?php echo (int)$rokMinuta; ?> min) · osveži stranicu da proveriš da li je stigla</span>
               </p>
             </div>
           </div>

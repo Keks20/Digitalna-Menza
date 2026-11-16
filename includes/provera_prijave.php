@@ -33,6 +33,10 @@ if (!$karticaUSesiji || !$karticaUSesiji->jeAktivna()) {
 }
 unset($karticaUSesiji);
 
+// IPS uplate kojima je prošao rok za potvrdu postaju 'isteklo' pre nego što stranica pročita uplate
+require_once __DIR__ . '/../src/TransakcijaRepository.php';
+(new TransakcijaRepository())->oznaciIstekleUplate();
+
 $obavestenjaZaZvonce = new ObavestenjeRepository();
 $zvonce = [
     'neprocitano' => $obavestenjaZaZvonce->brojNeprocitanih($studentId),

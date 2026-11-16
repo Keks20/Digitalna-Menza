@@ -19,7 +19,7 @@
  *   $ukupnoSedam        int        zbir izdatih za 7 dana
  *   $poMenzama          array      [['id', 'naziv' => 'Menza Ekonomski', 'izdato' => 412, 'kapacitet' => 600, 'procenat' => 69], ...]
  *   $poslednjeUplate    array      5 najnovijih uplata: [['id', 'kreirano', 'ime', 'prezime', 'broj_kartice', 'nacin', 'iznos', 'status'], ...]
- *   $brojNaCekanju      int        IPS uplate koje čekaju potvrdu
+ *   $brojNaCekanju      int        IPS uplate koje čekaju potvrdu banke (starije od 30 minuta ističu)
  */
 $dozvoljeneUloge = ['admin'];
 require_once __DIR__ . '/includes/provera_admina.php';

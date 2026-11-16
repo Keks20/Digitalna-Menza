@@ -3,6 +3,7 @@
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Bon.php';
 require_once __DIR__ . '/Format.php';
+require_once __DIR__ . '/Student.php';
 
 /**
  * Izdavanje obroka na kasi menze.
@@ -12,6 +13,8 @@ require_once __DIR__ . '/Format.php';
  *
  * Obrok se izdaje kad su ispunjeni svi uslovi:
  *   - kartica postoji i aktivna je
+ *   - kategorija studenta ima pravo na taj obrok (ko živi u Kragujevcu i nije u domu dobija samo ručak,
+ *     i kad su mu doručak ili večera ostali kupljeni iz vremena pre promene kategorije)
  *   - obrok se trenutno služi (radno vreme iz tipovi_obroka), osim ako je PROVERAVA_RADNO_VREME = false
  *   - student danas još nije dobio taj obrok (jedan obrok svake vrste dnevno, u bilo kojoj menzi)
  *   - za tekući mesec ima bar jedan neiskorišćen obrok te vrste
@@ -154,7 +157,8 @@ class Kasa
     /** Sve što treba za odluku, u jednom prolazu; uz $zakljucaj red kartice ostaje zaključan do kraja transakcije */
     private function podaciZaProveru(int $karticaId, int $tipObrokaId, int $vreme, bool $zakljucaj): ?array
     {
-        $sql = 'SELECT k.id, k.broj_kartice, k.status, s.ime, s.prezime
+        $sql = 'SELECT k.id, k.broj_kartice, k.status, s.ime, s.prezime, s.finansiranje, s.prebivaliste,
+                       EXISTS(SELECT 1 FROM smestaj_ugovori u WHERE u.student_id = s.id AND u.aktivan = 1) AS u_domu
                 FROM kartice k JOIN studenti s ON s.id = k.student_id
                 WHERE k.id = ?' . ($zakljucaj ? ' FOR UPDATE' : '');
         $stmt = $this->conn->prepare($sql);
@@ -197,6 +201,7 @@ class Kasa
             'broj_kartice' => $kartica['broj_kartice'],
             'aktivna' => $kartica['status'] === 'aktivna',
             'student' => $kartica['ime'] . ' ' . $kartica['prezime'],
+            'ima_pravo' => (new Student($kartica))->smeDaKupi($tipObrokaId),
             'tip_obroka_id' => $tipObrokaId,
             'obrok' => $tip['naziv'],
             'vreme_od' => $tip['vreme_od'],
@@ -224,6 +229,12 @@ class Kasa
 
         if (!$p['aktivna']) {
             return $rezultat + ['ishod' => 'odbijeno', 'razlog' => 'Kartica je blokirana.'];
+        }
+
+        if (!$p['ima_pravo']) {
+            return $rezultat + ['ishod' => 'odbijeno',
+                'razlog' => 'Student živi u Kragujevcu i ima pravo samo na ručak.'
+                    . ($preostalo > 0 ? ' Ranije kupljeni obroci ove vrste biće mu refundirani.' : '')];
         }
 
         $sat = date('H:i:s', $vreme);

@@ -33,9 +33,11 @@ $imeMeseca = strtok($nazivMeseca, ' ');
 $uMesecu = $mesecU[$imeMeseca] ?? $imeMeseca;
 
 $nazivIzabranog = '';
+$izabraniDozvoljen = true;
 foreach ($obroci as $o) {
     if ((int)$o['tip_obroka_id'] === $izabraniTip) {
         $nazivIzabranog = $o['naziv'];
+        $izabraniDozvoljen = $o['dozvoljen'];
     }
 }
 ?>
@@ -66,7 +68,7 @@ foreach ($obroci as $o) {
               <?php foreach ($obroci as $o): ?>
                 <?php $aktivan = (int)$o['tip_obroka_id'] === $izabraniTip; ?>
                 <a href="obroci.php?tip=<?php echo (int)$o['tip_obroka_id']; ?>"
-                   class="btn-choice flex-fill<?php echo $aktivan ? ' active' : ''; ?><?php echo $o['preostalo'] < 1 ? ' is-empty' : ''; ?>"
+                   class="btn-choice flex-fill<?php echo $aktivan ? ' active' : ''; ?><?php echo ($o['preostalo'] < 1 || !$o['dozvoljen']) ? ' is-empty' : ''; ?>"
                    <?php echo $aktivan ? 'aria-current="page"' : ''; ?>>
                   <?php echo htmlspecialchars($o['naziv']); ?>
                 </a>
@@ -93,7 +95,10 @@ foreach ($obroci as $o) {
           <?php else: ?>
             <div class="empty-state">
               <span class="tint-box tint-box-lg tint-blue mx-auto"><?php echo ikonica('qr'); ?></span>
-              <?php if ($ukupnoKupljeno === 0): ?>
+              <?php if (!$izabraniDozvoljen): ?>
+                <p class="empty-title">„<?php echo htmlspecialchars($nazivIzabranog); ?>" više ne možeš da iskoristiš</p>
+                <p class="empty-text">Tvoja kategorija (<?php echo htmlspecialchars($student->nazivKategorije()); ?>) ima pravo samo na ručak. Novac za preostale obroke ove vrste biće ti refundiran.</p>
+              <?php elseif ($ukupnoKupljeno === 0): ?>
                 <p class="empty-title">Nemaš kupljene obroke za <?php echo htmlspecialchars($nazivMeseca); ?></p>
                 <p class="empty-text">Kad kupiš obroke, ovde se pojavljuje QR bon koji pokazuješ na kasi.</p>
                 <a href="kupovina.php" class="btn btn-primary btn-app mt-3">Kupi obroke</a>
@@ -119,7 +124,7 @@ foreach ($obroci as $o) {
               <span class="tint-box <?php echo $iz['boja']; ?>"><?php echo ikonica($iz['ikonica']); ?></span>
               <div class="flex-fill">
                 <div class="d-flex justify-content-between">
-                  <span class="left-name"><?php echo htmlspecialchars($o['naziv']); ?></span>
+                  <span class="left-name"><?php echo htmlspecialchars($o['naziv']); ?><?php if (!$o['dozvoljen'] && $o['preostalo'] > 0): ?> <span class="tag tag-orange">Za refundaciju</span><?php endif; ?></span>
                   <strong><?php echo (int)$o['preostalo']; ?> / <?php echo (int)$o['kupljeno']; ?></strong>
                 </div>
                 <div class="progress left-progress" role="progressbar" aria-label="<?php echo htmlspecialchars($o['naziv']); ?>"
@@ -131,6 +136,15 @@ foreach ($obroci as $o) {
           <?php endforeach; ?>
           <?php if (empty($obroci)): ?>
             <p class="message-text mb-0">Još nema kupljenih obroka.</p>
+          <?php endif; ?>
+          <?php if ($zaRefundaciju > 0): ?>
+            <div class="note-box mt-3">
+              <?php echo ikonica('info'); ?>
+              <p>
+                <?php echo (int)$zaRefundaciju; ?> <?php echo Format::mnozina($zaRefundaciju, 'obrok', 'obroka', 'obroka'); ?> više ne možeš da iskoristiš, jer tvoja kategorija
+                ima pravo samo na ručak. Novac za njih biće ti refundiran.
+              </p>
+            </div>
           <?php endif; ?>
         </section>
 

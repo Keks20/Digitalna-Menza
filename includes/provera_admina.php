@@ -7,7 +7,10 @@
  *   $dozvoljeneUloge = ['admin', 'kasir'];   // i kasir
  *   require_once __DIR__ . '/includes/provera_admina.php';
  *
- * Posle toga su dostupni $adminAuth, $adminId i $admin (objekat Admin).
+ * Posle toga su dostupni $adminAuth, $adminId, $admin (objekat Admin) i $zvonceAdmina.
+ *
+ * $zvonceAdmina su podaci za zvonce u zaglavlju (views/delovi/korisnik.php):
+ *   ['na_cekanju' => 2]   koliko IPS uplata čeka potvrdu banke; null za kasira (kasir nema zvonce)
  */
 require_once __DIR__ . '/../src/AdminAuth.php';
 require_once __DIR__ . '/../src/AdminRepository.php';
@@ -37,3 +40,12 @@ if (!$admin) {
     header('Location: admin_login.php');
     exit;
 }
+
+// IPS uplate kojima je prošao rok za potvrdu postaju 'isteklo' pre nego što stranica pročita uplate
+require_once __DIR__ . '/../src/TransakcijaRepository.php';
+$uplateZaZvonce = new TransakcijaRepository();
+$uplateZaZvonce->oznaciIstekleUplate();
+
+// Zvonce u zaglavlju (views/delovi/korisnik.php): administrator vidi koliko IPS uplata čeka potvrdu banke
+$zvonceAdmina = $admin->jeAdmin() ? ['na_cekanju' => $uplateZaZvonce->brojUplataNaCekanju()] : null;
+unset($uplateZaZvonce);
